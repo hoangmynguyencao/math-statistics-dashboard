@@ -229,7 +229,7 @@ def calculate_statistics(raw_data: str, mode: str = "simple") -> Dict[str, Any]:
         "range_latex": f"R = x_{{max}} - x_{{min}} = {max_val} - {min_val} = {range_val}",
         "variance_latex": f"s^2 = \\frac{{1}}{{n}}\\sum_{{i=1}}^{{n}} (x_i - \\bar{{x}})^2 = \\frac{{{round(sum_sq_diff, 4)}}}{{{n}}} = {variance_val}",
         "std_dev_latex": f"s = \\sqrt{{s^2}} = \\sqrt{{{variance_val}}} = {std_dev_val}",
-        "outlier_condition_latex": f"x < Q_1 - 1{,}5\\Delta_Q = {lower_bound} \\quad \\text{{hoặc}} \\quad x > Q_3 + 1{,}5\\Delta_Q = {upper_bound}",
+        "outlier_condition_latex": f"x < Q_1 - 1{{,}}5\\Delta_Q = {lower_bound} \\quad \\text{{hoặc}} \\quad x > Q_3 + 1{{,}}5\\Delta_Q = {upper_bound}",
         "mode_latex": f"M_o = {', '.join(map(str, modes))}" if has_mode else "\\text{Không có mốt}"
     }
 

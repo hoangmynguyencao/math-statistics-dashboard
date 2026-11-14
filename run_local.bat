@@ -1,56 +1,84 @@
 @echo off
-chcp 65001 >nul
+setlocal enabledelayedexpansion
+
+REM Dam bao luon chay tai thu muc chua file script nay
+cd /d "%~dp0"
+
 echo ====================================================================
-echo    KHỞI CHẠY BẢNG ĐIỀU KHIỂN NHẬP LIỆU & THỐNG KÊ TOÁN 10
+echo    KHOI CHAY BANG DIEU KHIEN NHAP LIEU VA THONG KE TOAN 10
 echo ====================================================================
 echo.
 
-REM Đặt lệnh Python theo yêu cầu của bạn
-set PYTHON_CMD=python3.14-64.exe
+REM 1. Tu dong them Node.js neu chua co trong PATH
+if exist "C:\Program Files\nodejs" (
+    set "PATH=C:\Program Files\nodejs;!PATH!"
+)
 
-REM Kiểm tra Python
-where %PYTHON_CMD% >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [!] Không tìm thấy lệnh %PYTHON_CMD% trong PATH.
-    echo Đang thử kiểm tra lệnh python mặc định...
-    where python >nul 2>nul
-    if %errorlevel% equ 0 (
-        set PYTHON_CMD=python
-        echo [OK] Đã chuyển sang dùng lệnh: python
-    ) else (
-        echo [!] Không tìm thấy Python trong hệ thống. Vui lòng kiểm tra lại PATH!
-        pause
-        exit /b
+REM 2. Tu dong them cac thu muc Python pho bien vao PATH
+if exist "%LOCALAPPDATA%\Python\bin" (
+    set "PATH=%LOCALAPPDATA%\Python\bin;!PATH!"
+)
+for /d %%D in ("%LOCALAPPDATA%\Python\pythoncore-*") do (
+    if exist "%%D" set "PATH=%%D;%%D\Scripts;!PATH!"
+)
+for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python*") do (
+    if exist "%%D" set "PATH=%%D;%%D\Scripts;!PATH!"
+)
+for /d %%D in ("C:\Program Files\Python*") do (
+    if exist "%%D" set "PATH=%%D;%%D\Scripts;!PATH!"
+)
+
+REM 3. Xac dinh lenh Python (Kiem tra kha nang thuc thi thuc te)
+set "PYTHON_CMD="
+
+for %%C in (python3.14-64.exe python3.14.exe python.exe py.exe) do (
+    if "!PYTHON_CMD!"=="" (
+        where %%C >nul 2>nul
+        if !errorlevel! equ 0 (
+            %%C -c "import sys" >nul 2>nul
+            if !errorlevel! equ 0 (
+                set "PYTHON_CMD=%%C"
+                echo [OK] Phat hien lenh Python hop le: %%C
+            )
+        )
     )
-) else (
-    echo [OK] Đã tìm thấy: %PYTHON_CMD%
 )
 
-REM Kiểm tra Node.js
-where npm >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [!] Không tìm thấy lệnh npm trong PATH. Vui lòng cài đặt Node.js 18+
+if "!PYTHON_CMD!"=="" (
+    echo [!] Khong tim thay trinh thong dich Python kha dung trong PATH.
+    echo Vui long kiem tra lai duong dan Python hoac mo file run_local.bat de sua.
     pause
-    exit /b
+    exit /b 1
 )
+
+REM 4. Kiem tra Node.js va npm
+where npm >nul 2>nul
+if !errorlevel! neq 0 (
+    echo [!] Khong tim thay lenh npm hoac Node.js.
+    echo Vui long cai dat Node.js tai https://nodejs.org/
+    pause
+    exit /b 1
+)
+echo [OK] Phat hien Node.js va npm san sang.
 
 echo.
-echo [1/2] Đang khởi chạy Backend FastAPI với %PYTHON_CMD% tại http://localhost:8000 ...
-start "Backend FastAPI" cmd /k "%PYTHON_CMD% -m pip install -r requirements.txt && %PYTHON_CMD% -m uvicorn backend.app.main:app --reload --port 8000"
+echo [1/2] Dang khoi chay Backend FastAPI voi !PYTHON_CMD! tai http://localhost:8000 ...
+start "Backend FastAPI" /d "%~dp0" cmd /k "!PYTHON_CMD! -m pip install -r requirements.txt && !PYTHON_CMD! -m uvicorn backend.app.main:app --reload --port 8000"
 
-echo [2/2] Đang khởi chạy Frontend Vite React tại http://localhost:5173 ...
-cd frontend
+echo [2/2] Dang khoi chay Frontend Vite React tai http://localhost:5173 ...
+cd /d "%~dp0frontend"
 if not exist "node_modules" (
-    echo Đang cài đặt thư viện frontend npm...
+    echo Dang cai dat thu vien frontend npm, vui long cho trong giay lat...
     call npm install
 )
-start "Frontend React" cmd /k "npm run dev"
+start "Frontend React" /d "%~dp0frontend" cmd /k "npm run dev"
+cd /d "%~dp0"
 
 echo.
 echo ====================================================================
-echo Đã khởi động xong!
-echo - Trình thông dịch Python sử dụng: %PYTHON_CMD%
-echo - Trang web giao diện: http://localhost:5173
-echo - Tài liệu API Swagger: http://localhost:8000/docs
+echo Da gui lenh khoi dong thanh cong!
+echo - Trinh thong dich Python: !PYTHON_CMD!
+echo - Giao dien trang web:     http://localhost:5173
+echo - Tai lieu API Swagger:    http://localhost:8000/docs
 echo ====================================================================
 pause
