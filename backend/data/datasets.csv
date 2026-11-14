@@ -1,9 +1,1 @@
-id,name,mode,raw_data,sample_size,mean,median,q1,q3,iqr,range_val,variance,std_dev,outliers,notes,created_at,updated_at
-demo-1,Điểm kiểm tra giữa kì môn Toán 10 (Lớp 10A1),simple,"7.5, 8.0, 6.5, 9.0, 8.5, 7.0, 8.0, 9.5, 4.0, 8.5, 9.0, 8.0, 7.5, 10.0, 1.5, 8.0, 7.0, 8.5, 9.0, 6.0",20,7.6,8.0,7.0,8.75,1.75,8.5,3.39,1.8412,"[1.5, 4.0]","Mẫu số liệu có chứa điểm ngoại lệ bất thường x = 1.5 (học sinh bị ốm phải bỏ dở bài thi).",2026-11-14 20:00:00,2026-11-14 20:00:00
-demo-2,Bảng tần số: Số con trong 40 hộ gia đình ở thôn An Bình,frequency,"0: 4
-1: 12
-2: 18
-3: 5
-4: 1",40,1.675,2.0,1.0,2.0,1.0,4.0,0.8694,0.9324,"[]","Khảo sát theo SGK Toán 10 KNTT về số con trong gia đình. Cỡ mẫu n = 40.",2026-11-14 20:05:00,2026-11-14 20:05:00
-demo-3,Chiều cao 15 học sinh nam đội bóng rổ lớp 10 (cm),simple,"168, 172, 170, 175, 169, 171, 174, 182, 170, 173, 168, 176, 172, 170, 195",15,173.6667,172.0,170.0,175.5,5.5,27.0,43.2889,6.5794,"[195.0]","Chiều cao trung bình và nhận diện học sinh có chiều cao đột biến x = 195 cm.",2026-11-14 20:10:00,2026-11-14 20:10:00
-demo-4,Thời gian chạy cự ly 100m của các vận động viên (giây),simple,"12.2, 11.8, 12.5, 11.5, 12.0, 13.1, 11.9, 12.3, 12.1, 11.7, 14.8",11,12.3545,12.1,11.8,12.5,0.7,3.3,0.7497,0.8659,"[14.8]","Khảo sát chỉ số độ phân tán (R, Delta_Q, s) và phát hiện giá trị ngoại lệ x = 14.8s.",2026-11-14 20:15:00,2026-11-14 20:15:00
+﻿id,name,mode,raw_data,sample_size,mean,median,q1,q3,iqr,range_val,variance,std_dev,outliers,notes,created_at,updated_at

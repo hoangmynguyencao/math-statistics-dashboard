@@ -1,20 +1,22 @@
 import React from 'react';
-import { Menu, Sun, Moon, Download, Sparkles, BookOpen } from 'lucide-react';
+import { Menu, Sun, Moon, Download, Home, FileText } from 'lucide-react';
 
 export default function Header({
   onOpenMobileSidebar,
   isDarkMode,
   toggleDarkMode,
   onExportCsv,
-  onOpenDemo,
+  onGoHome,
   activeTab
 }) {
   const getTabTitle = () => {
     switch (activeTab) {
+      case 'home':
+        return 'Trang chủ giới thiệu';
       case 'dashboard':
         return 'Bảng điều khiển tổng quan';
       case 'entry':
-        return 'Nhập liệu mẫu số liệu mới';
+        return 'Nhập liệu mẫu số liệu';
       case 'reports':
         return 'Báo cáo & Phân tích thống kê';
       default:
@@ -31,6 +33,7 @@ export default function Header({
             type="button"
             onClick={onOpenMobileSidebar}
             className="lg:hidden p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            title="Mở menu điều hướng"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -50,29 +53,33 @@ export default function Header({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2">
+          {/* Nút về Trang chủ */}
           <button
             type="button"
-            onClick={onOpenDemo}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
+            onClick={onGoHome}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
+            title="Quay lại Trang chủ giới thiệu"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Ví dụ SGK 10</span>
+            <Home className="w-3.5 h-3.5 text-indigo-500" />
+            <span className="hidden sm:inline">Trang chủ</span>
           </button>
 
+          {/* Nút Xuất CSV */}
           <button
             type="button"
             onClick={onExportCsv}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/70 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/80"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/70 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/80 cursor-pointer"
             title="Xuất cơ sở dữ liệu CSV"
           >
             <Download className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Xuất CSV</span>
           </button>
 
+          {/* Toggle Dark / Light */}
           <button
             type="button"
             onClick={toggleDarkMode}
-            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             title="Chuyển chế độ Dark / Light"
           >
             {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}

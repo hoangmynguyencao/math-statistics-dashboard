@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { 
   Sparkles, 
   Save, 
@@ -8,7 +9,11 @@ import {
   CheckCircle, 
   AlertCircle,
   FileText,
-  HelpCircle
+  HelpCircle,
+  Upload,
+  FileSpreadsheet,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import MathFormula from './MathFormula';
 import { parseRawData } from '../utils/statsCalculator';
@@ -16,7 +21,9 @@ import { parseRawData } from '../utils/statsCalculator';
 export default function DataEntryForm({ 
   currentDataset, 
   onSave, 
-  onSelectDemo, 
+  onDataChange,
+  onNewDataset,
+  onViewReports,
   statsPreview, 
   isSaving 
 }) {
@@ -25,21 +32,89 @@ export default function DataEntryForm({
   const [rawData, setRawData] = useState('');
   const [notes, setNotes] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [excelError, setExcelError] = useState('');
+  const [showExcelGuide, setShowExcelGuide] = useState(false);
+  const excelInputRef = useRef(null);
 
-  // Sync with current dataset when loaded or edited
+  // Chỉ sync form khi dataset ID thay đổi (không reset khi người dùng đang gõ)
+  const prevDatasetIdRef = useRef(null);
   useEffect(() => {
-    if (currentDataset) {
-      setName(currentDataset.name || '');
-      setMode(currentDataset.mode || 'simple');
-      setRawData(currentDataset.raw_data || currentDataset.rawData || '');
-      setNotes(currentDataset.notes || '');
+    const currentId = currentDataset?.id ?? null;
+    if (currentId !== prevDatasetIdRef.current) {
+      prevDatasetIdRef.current = currentId;
+      setName(currentDataset?.name || '');
+      setMode(currentDataset?.mode || 'simple');
+      setRawData(currentDataset?.raw_data || currentDataset?.rawData || '');
+      setNotes(currentDataset?.notes || '');
     }
   }, [currentDataset]);
+
+  // Thông báo dữ liệu thay đổi lên component cha để tính toán thời gian thực
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange({
+        name,
+        mode,
+        raw_data: rawData,
+        notes
+      });
+    }
+  }, [name, mode, rawData, notes]);
 
   const handleClear = () => {
     setName('');
     setRawData('');
     setNotes('');
+    setExcelError('');
+    // Báo lên App.jsx để tạo activeDataset mới (không có id) → lần lưu tiếp sẽ POST tạo mới
+    if (onNewDataset) onNewDataset();
+  };
+
+  // Nhập dữ liệu từ file Excel
+  const handleExcelImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setExcelError('');
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const wb = XLSX.read(evt.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+        if (rows.length <= 1) {
+          throw new Error('File Excel không có dữ liệu (chỉ có tiêu đề hoặc rỗng)');
+        }
+
+        if (mode === 'simple') {
+          // Cột A = số liệu, hàng 1 = tiêu đề (bỏ qua), hàng 2+ = dữ liệu
+          const numbers = rows.slice(1)
+            .map(r => r[0])
+            .filter(v => v !== '' && v !== null && v !== undefined)
+            .map(v => String(v).replace(',', '.'));
+          if (numbers.length === 0) {
+            throw new Error('Không tìm thấy dữ liệu số trong cột A (từ hàng 2 trở đi)');
+          }
+          setRawData(numbers.join('; '));
+        } else {
+          // Cột A = giá trị, Cột B = tần số; hàng 1 = tiêu đề (bỏ qua)
+          const lines = rows.slice(1)
+            .filter(r => r[0] !== '' && r[0] !== null && r[0] !== undefined
+                      && r[1] !== '' && r[1] !== null && r[1] !== undefined)
+            .map(r => `${String(r[0]).replace(',', '.')}: ${r[1]}`);
+          if (lines.length === 0) {
+            throw new Error('Không tìm thấy dữ liệu hợp lệ trong cột A và B (từ hàng 2 trở đi)');
+          }
+          setRawData(lines.join('\n'));
+        }
+      } catch (err) {
+        setExcelError('Lỗi đọc file Excel: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    // Reset input để có thể chọn lại cùng file
+    e.target.value = '';
   };
 
   const handleSubmit = async (e) => {
@@ -85,24 +160,15 @@ export default function DataEntryForm({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onSelectDemo}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/60"
-            title="Nạp nhanh các ví dụ thực tế trong SGK Toán 10"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            Tự động sinh dữ liệu mẫu
-          </button>
-
+          {/* Nút Thêm mẫu số liệu mới — reset form + tạo dataset mới (không ghi đè mẫu cũ) */}
           <button
             type="button"
             onClick={handleClear}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-            title="Làm mới form nhập"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:text-white hover:bg-emerald-600 dark:hover:bg-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 rounded-lg transition-all border border-emerald-300 dark:border-emerald-800"
+            title="Xóa form và bắt đầu nhập mẫu số liệu mới (mẫu đã lưu không bị mất)"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            Làm mới
+            Thêm mẫu số liệu mới
           </button>
         </div>
       </div>
@@ -189,6 +255,105 @@ export default function DataEntryForm({
           />
         </div>
 
+        {/* Excel Import Block */}
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/60 dark:bg-emerald-950/20 p-3.5 space-y-2.5">
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={excelInputRef}
+            accept=".xlsx,.xls"
+            onChange={handleExcelImport}
+            className="hidden"
+          />
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => excelInputRef.current?.click()}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              Nhập từ Excel (.xlsx / .xls)
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowExcelGuide(v => !v)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors border border-emerald-200 dark:border-emerald-800"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              Yêu cầu định dạng file Excel
+              {showExcelGuide ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+          </div>
+
+          {/* Error message */}
+          {excelError && (
+            <div className="flex items-start gap-2 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-lg px-3 py-2">
+              <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <span>{excelError}</span>
+            </div>
+          )}
+
+          {/* Guide panel */}
+          {showExcelGuide && (
+            <div className="text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/60 rounded-lg p-3.5 space-y-3 leading-relaxed">
+              {mode === 'simple' ? (
+                <>
+                  <p className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    Yêu cầu định dạng (Chế độ: Dãy số liệu)
+                  </p>
+                  <ul className="space-y-1 text-slate-600 dark:text-slate-400 list-disc list-inside">
+                    <li><strong>Cột A</strong>: Chứa các giá trị số liệu (một số trên mỗi hàng)</li>
+                    <li><strong>Hàng 1</strong>: Tiêu đề cột (ví dụ: <em>"Giá trị"</em>) — sẽ được bỏ qua tự động</li>
+                    <li><strong>Hàng 2 trở đi</strong>: Các giá trị số liệu thực tế</li>
+                    <li>Chỉ đọc <strong>Sheet đầu tiên</strong> của file; dấu phẩy trong số thập phân sẽ tự đổi thành dấu chấm</li>
+                  </ul>
+                  <div className="font-mono text-[11px] bg-slate-50 dark:bg-slate-800 rounded p-2 border border-slate-200 dark:border-slate-700">
+                    <div className="grid grid-cols-2 gap-1 max-w-[200px]">
+                      <span className="font-bold text-indigo-600 dark:text-indigo-400 col-span-1 border-b border-slate-300 dark:border-slate-600 pb-1">A (Giá trị)</span>
+                      <span className="text-slate-400 col-span-1 border-b border-slate-300 dark:border-slate-600 pb-1 text-[10px]">(cột khác: bỏ qua)</span>
+                      {['7.5','8.0','6.5','9.0','8.5'].map(v => (
+                        <React.Fragment key={v}>
+                          <span className="text-slate-800 dark:text-slate-200">{v}</span>
+                          <span></span>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    Yêu cầu định dạng (Chế độ: Bảng tần số)
+                  </p>
+                  <ul className="space-y-1 text-slate-600 dark:text-slate-400 list-disc list-inside">
+                    <li><strong>Cột A</strong>: Giá trị (x&#7522;) — số nguyên hoặc số thập phân</li>
+                    <li><strong>Cột B</strong>: Tần số (n&#7522;) — phải là số nguyên dương</li>
+                    <li><strong>Hàng 1</strong>: Tiêu đề cột (ví dụ: <em>"Giá trị", "Tần số"</em>) — bỏ qua tự động</li>
+                    <li><strong>Hàng 2 trở đi</strong>: Từng cặp (giá trị, tần số) tương ứng</li>
+                    <li>Chỉ đọc <strong>Sheet đầu tiên</strong>; các cột khác (C, D, …) bỏ qua</li>
+                  </ul>
+                  <div className="font-mono text-[11px] bg-slate-50 dark:bg-slate-800 rounded p-2 border border-slate-200 dark:border-slate-700">
+                    <div className="grid grid-cols-2 gap-x-4 max-w-[220px]">
+                      <span className="font-bold text-indigo-600 dark:text-indigo-400 border-b border-slate-300 dark:border-slate-600 pb-1">A (Giá trị)</span>
+                      <span className="font-bold text-violet-600 dark:text-violet-400 border-b border-slate-300 dark:border-slate-600 pb-1">B (Tần số)</span>
+                      {[['0','4'],['1','12'],['2','18'],['3','5'],['4','1']].map(([v,f]) => (
+                        <React.Fragment key={v}>
+                          <span className="text-slate-800 dark:text-slate-200">{v}</span>
+                          <span className="text-slate-800 dark:text-slate-200">{f}</span>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Row 3: Tự động hiển thị dãy sắp xếp không giảm */}
         {sortedPreview.length > 0 && (
           <div className="bg-slate-50 dark:bg-slate-850/70 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
@@ -238,12 +403,31 @@ export default function DataEntryForm({
             Tự động cập nhật thống kê ngay khi gõ
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {saveSuccess && (
-              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1 animate-fade-in">
-                <CheckCircle className="w-4 h-4" />
-                Đã lưu thành công vào file CSV!
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  Đã lưu vào CSV!
+                </span>
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-xs"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Nhập mẫu tiếp theo
+                </button>
+                {onViewReports && (
+                  <button
+                    type="button"
+                    onClick={onViewReports}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800"
+                  >
+                    Xem báo cáo →
+                  </button>
+                )}
+              </div>
             )}
             <button
               type="submit"
@@ -251,7 +435,7 @@ export default function DataEntryForm({
               className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm hover:shadow transition-all"
             >
               <Save className="w-4 h-4" />
-              {isSaving ? 'Đang lưu...' : 'Lưu dữ liệu vào CSV'}
+              {isSaving ? 'Đang lưu...' : currentDataset?.id && !String(currentDataset.id).startsWith('local-') ? 'Cập nhật CSV' : 'Lưu vào CSV'}
             </button>
           </div>
         </div>

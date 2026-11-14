@@ -28,44 +28,15 @@ CSV_HEADERS = [
     "updated_at"
 ]
 
-DEMO_DATASETS = [
-    {
-        "name": "Điểm kiểm tra giữa kì môn Toán 10 (Lớp 10A1)",
-        "mode": "simple",
-        "raw_data": "7.5, 8.0, 6.5, 9.0, 8.5, 7.0, 8.0, 9.5, 4.0, 8.5, 9.0, 8.0, 7.5, 10.0, 1.5, 8.0, 7.0, 8.5, 9.0, 6.0",
-        "notes": "Mẫu số liệu có chứa điểm ngoại lệ bất thường x = 1.5 (học sinh bị ốm phải bỏ dở bài thi)."
-    },
-    {
-        "name": "Bảng tần số: Số con trong 40 hộ gia đình ở thôn An Bình",
-        "mode": "frequency",
-        "raw_data": "0: 4\n1: 12\n2: 18\n3: 5\n4: 1",
-        "notes": "Khảo sát theo SGK Toán 10 KNTT về số con trong gia đình. Cỡ mẫu n = 40."
-    },
-    {
-        "name": "Chiều cao 15 học sinh nam đội bóng rổ lớp 10 (cm)",
-        "mode": "simple",
-        "raw_data": "168, 172, 170, 175, 169, 171, 174, 182, 170, 173, 168, 176, 172, 170, 195",
-        "notes": "Chiều cao trung bình và nhận diện học sinh có chiều cao đột biến x = 195 cm."
-    },
-    {
-        "name": "Thời gian chạy cự ly 100m của các vận động viên (giây)",
-        "mode": "simple",
-        "raw_data": "12.2, 11.8, 12.5, 11.5, 12.0, 13.1, 11.9, 12.3, 12.1, 11.7, 14.8",
-        "notes": "Khảo sát chỉ số độ phân tán (R, Delta_Q, s) và phát hiện giá trị ngoại lệ x = 14.8s."
-    }
-]
+DEMO_DATASETS = []
 
 def init_db():
-    """Khởi tạo file CSV nếu chưa tồn tại, thêm dữ liệu mẫu SGK 10."""
+    """Khởi tạo file CSV nếu chưa tồn tại (chỉ tạo tiêu đề, người dùng sẽ tự nhập dữ liệu)."""
     DATA_DIR.mkdir(exist_ok=True, parents=True)
     if not CSV_FILE_PATH.exists() or CSV_FILE_PATH.stat().st_size == 0:
         with open(CSV_FILE_PATH, mode="w", newline="", encoding="utf-8-sig") as f:
             writer = csv.writer(f)
             writer.writerow(CSV_HEADERS)
-
-        # Nạp dữ liệu mẫu
-        for item in DEMO_DATASETS:
-            save_dataset_item(item["name"], item["mode"], item["raw_data"], item["notes"])
 
 def row_to_dataset(row: Dict[str, str]) -> DatasetResponse:
     """Chuyển đổi một dòng CSV thành đối tượng DatasetResponse kèm thống kê chi tiết."""

@@ -18,7 +18,7 @@ export default function SettingsModal({ isOpen, onClose, onResetDemoData }) {
   if (!isOpen) return null;
 
   const handleReset = async () => {
-    if (window.confirm('Bạn có chắc chắn muốn khôi phục lại các bộ dữ liệu mẫu ban đầu của SGK Toán 10? Mọi chỉnh sửa tạm thời sẽ được làm mới.')) {
+    if (window.confirm('Bạn có chắc chắn muốn làm sạch toàn bộ dữ liệu đã lưu trong cơ sở dữ liệu CSV?')) {
       setResetting(true);
       await onResetDemoData();
       setResetting(false);
@@ -69,27 +69,27 @@ export default function SettingsModal({ isOpen, onClose, onResetDemoData }) {
             <div className="bg-slate-50 dark:bg-slate-850 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  Khôi phục dữ liệu mẫu chuẩn SGK 10
+                  Làm sạch dữ liệu trong CSV
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Làm mới lại toàn bộ bảng tính về 4 bài toán mẫu chuẩn ban đầu trong SGK.
+                  Xóa tất cả các mẫu số liệu đã lưu và đưa cơ sở dữ liệu về trạng thái trống ban đầu.
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 {resetSuccess && (
                   <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    <Check className="w-4 h-4" /> Đã khôi phục!
+                    <Check className="w-4 h-4" /> Đã xóa dữ liệu!
                   </span>
                 )}
                 <button
                   type="button"
                   onClick={handleReset}
                   disabled={resetting}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-900/60 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  {resetting ? 'Đang khôi phục...' : 'Khôi phục mặc định'}
+                  {resetting ? 'Đang xóa...' : 'Làm sạch CSV'}
                 </button>
               </div>
             </div>

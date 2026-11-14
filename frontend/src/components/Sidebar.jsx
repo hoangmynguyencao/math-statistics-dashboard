@@ -1,5 +1,6 @@
 import React from 'react';
 import { 
+  Home,
   LayoutDashboard, 
   FileSpreadsheet, 
   FileBarChart2, 
@@ -10,7 +11,6 @@ import {
   Sun, 
   BookOpen, 
   BarChart, 
-  Sparkles,
   X,
   Sigma
 } from 'lucide-react';
@@ -19,7 +19,6 @@ export default function Sidebar({
   activeTab,
   setActiveTab,
   onQuickAdd,
-  onOpenDemo,
   isDarkMode,
   toggleDarkMode,
   isOpenMobile,
@@ -30,9 +29,15 @@ export default function Sidebar({
 }) {
   const menuItems = [
     {
+      id: 'home',
+      label: 'Trang chủ',
+      sub: 'Giới thiệu & Hướng dẫn',
+      icon: Home,
+    },
+    {
       id: 'dashboard',
       label: 'Tổng quan',
-      sub: 'Dashboard chính',
+      sub: 'Bảng điều khiển chính',
       icon: LayoutDashboard,
     },
     {
@@ -50,7 +55,7 @@ export default function Sidebar({
     {
       id: 'settings',
       label: 'Cài đặt & Trợ giúp',
-      sub: 'Công thức & Dữ liệu',
+      sub: 'Công thức & Thông tin',
       icon: Settings,
     },
   ];
@@ -83,8 +88,16 @@ export default function Sidebar({
         {/* Top Brand / Logo */}
         <div className="p-5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+            <button 
+              type="button"
+              onClick={() => {
+                setActiveTab('home');
+                setIsOpenMobile(false);
+              }}
+              className="flex items-center gap-3 text-left hover:opacity-90 transition-opacity cursor-pointer"
+              title="Về Trang chủ"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
                 <Sigma className="w-6 h-6 stroke-[2.5]" />
               </div>
               <div>
@@ -95,7 +108,7 @@ export default function Sidebar({
                   SGK Kết Nối Tri Thức
                 </span>
               </div>
-            </div>
+            </button>
 
             {/* Mobile close button */}
             <button
@@ -107,17 +120,17 @@ export default function Sidebar({
             </button>
           </div>
 
-          {/* Quick Add Button */}
+          {/* Quick Action Button: Nhập số liệu mới */}
           <button
             type="button"
             onClick={() => {
               onQuickAdd();
               setIsOpenMobile(false);
             }}
-            className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-md shadow-indigo-600/20 transition-all"
+            className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
           >
             <PlusCircle className="w-4 h-4" />
-            Thêm dữ liệu nhanh
+            <span>Tự nhập mẫu số liệu mới</span>
           </button>
 
           {/* Quick Search */}
@@ -128,59 +141,55 @@ export default function Sidebar({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm kiếm mẫu số liệu..."
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2">
-            Điều hướng chính
-          </div>
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleNavClick(item.id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                  isActive
-                    ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold shadow-2xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                }`}
-              >
-                <Icon
-                  className={`w-4 h-4 ${
-                    isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'
+        {/* Center: Navigation Items */}
+        <div className="flex-1 overflow-y-auto px-4 py-5 space-y-4">
+          <nav className="space-y-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleNavClick(item.id)}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold shadow-2xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60'
                   }`}
-                />
-                <div className="text-left flex-1">
-                  <div>{item.label}</div>
-                  <div className="text-[10px] font-normal text-slate-400 dark:text-slate-500">
-                    {item.sub}
+                >
+                  <Icon
+                    className={`w-4 h-4 ${
+                      isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'
+                    }`}
+                  />
+                  <div className="text-left flex-1">
+                    <div>{item.label}</div>
+                    <div className="text-[10px] font-normal text-slate-400 dark:text-slate-500">
+                      {item.sub}
+                    </div>
                   </div>
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </nav>
 
           <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 mb-2">
-              Khám phá nhanh
-            </div>
             <button
               type="button"
               onClick={() => {
-                onOpenDemo();
+                setActiveTab('home');
                 setIsOpenMobile(false);
               }}
-              className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition-all"
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition-all cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>Dữ liệu mẫu SGK 10</span>
+              <Home className="w-4 h-4 text-indigo-500" />
+              <span>Về Trang chủ giới thiệu</span>
             </button>
           </div>
         </div>

@@ -154,7 +154,9 @@ export default function DataTable({
             {filteredDatasets.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-8 text-center text-slate-400">
-                  Không tìm thấy mẫu số liệu nào phù hợp.
+                  {datasets.length === 0
+                    ? 'Chưa có mẫu số liệu nào được lưu trong cơ sở dữ liệu. Bạn hãy nhập mẫu số liệu đầu tiên ở form phía trên!'
+                    : 'Không tìm thấy mẫu số liệu nào phù hợp với bộ lọc.'}
                 </td>
               </tr>
             ) : (
