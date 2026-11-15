@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .config import CORS_ORIGINS, FRONTEND_DIST_DIR, CSV_FILE_PATH
+from .config import CORS_ORIGINS, FRONTEND_DIST_DIR
 from .models import (
     DatasetCreate,
     DatasetUpdate,
@@ -57,7 +57,7 @@ async def health_check():
 
 @app.post("/api/stats/calculate", response_model=StatsResult)
 async def calculate_stats(payload: ComputeStatsRequest):
-    """Tính toán thống kê tức thời từ chuỗi số liệu (không lưu vào CSV)."""
+    """Tính toán thống kê tức thời từ chuỗi số liệu (không lưu vào cơ sở dữ liệu)."""
     try:
         stats = calculate_statistics(payload.raw_data, payload.mode)
         return StatsResult(**stats)
@@ -68,12 +68,12 @@ async def calculate_stats(payload: ComputeStatsRequest):
 
 @app.get("/api/datasets", response_model=list[DatasetResponse])
 async def list_datasets():
-    """Lấy danh sách toàn bộ các bài toán/mẫu số liệu đã lưu trong file CSV."""
+    """Lấy danh sách toàn bộ các bài toán/mẫu số liệu đã lưu trong cơ sở dữ liệu SQLite."""
     return get_all_datasets()
 
 @app.post("/api/datasets", response_model=DatasetResponse, status_code=status.HTTP_201_CREATED)
 async def create_dataset(payload: DatasetCreate):
-    """Lưu mẫu số liệu mới vào file CSV và tự động tính toán các chỉ số."""
+    """Lưu mẫu số liệu mới vào SQLite và tự động tính toán các chỉ số."""
     try:
         new_item = save_dataset_item(
             name=payload.name,
@@ -97,7 +97,7 @@ async def get_dataset(dataset_id: str):
 
 @app.put("/api/datasets/{dataset_id}", response_model=DatasetResponse)
 async def update_dataset(dataset_id: str, payload: DatasetUpdate):
-    """Cập nhật bài toán/mẫu số liệu và tự động cập nhật lại CSV."""
+    """Cập nhật bài toán/mẫu số liệu trong cơ sở dữ liệu SQLite."""
     try:
         updated = update_dataset_item(dataset_id, payload)
         if not updated:
@@ -110,7 +110,7 @@ async def update_dataset(dataset_id: str, payload: DatasetUpdate):
 
 @app.delete("/api/datasets/{dataset_id}")
 async def delete_dataset(dataset_id: str):
-    """Xóa mẫu số liệu khỏi CSV."""
+    """Xóa mẫu số liệu khỏi SQLite."""
     success = delete_dataset_item(dataset_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Không tìm thấy mẫu số liệu để xóa.")
@@ -118,21 +118,9 @@ async def delete_dataset(dataset_id: str):
 
 @app.post("/api/datasets/reset")
 async def reset_datasets():
-    """Khôi phục các bộ dữ liệu mẫu mặc định SGK 10."""
+    """Làm sạch toàn bộ cơ sở dữ liệu SQLite."""
     reset_to_demo_data()
-    return {"message": "Đã khôi phục các bộ dữ liệu mẫu SGK Toán 10 thành công."}
-
-@app.get("/api/export/csv")
-async def export_csv():
-    """Tải xuống trực tiếp file dữ liệu CSV."""
-    init_db()
-    if not CSV_FILE_PATH.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File CSV chưa tồn tại.")
-    return FileResponse(
-        path=CSV_FILE_PATH,
-        filename="bang_thong_ke_toan10.csv",
-        media_type="text/csv"
-    )
+    return {"message": "Đã làm sạch cơ sở dữ liệu SQLite thành công."}
 
 # --- CẤU HÌNH PHỤC VỤ FRONTEND BUILD (DÀNH CHO PRODUCTION DEPLOY TRÊN RENDER) ---
 if FRONTEND_DIST_DIR.exists():

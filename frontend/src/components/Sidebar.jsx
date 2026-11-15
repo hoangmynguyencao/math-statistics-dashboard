@@ -212,11 +212,11 @@ export default function Sidebar({
 
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-850 text-[11px] text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-800">
             <div className="font-semibold text-slate-700 dark:text-slate-300 mb-0.5">
-              Cơ sở dữ liệu CSV
+              Cơ sở dữ liệu SQLite
             </div>
             <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium text-[10px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Lưu tự động vào datasets.csv
+              Lưu tự động vào cơ sở dữ liệu
             </div>
           </div>
         </div>

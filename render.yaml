@@ -8,6 +8,6 @@ services:
     startCommand: "uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.12
+        value: 3.13.0
       - key: NODE_VERSION
         value: 20.10.0

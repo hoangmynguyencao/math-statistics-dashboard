@@ -9,49 +9,30 @@ echo    KHOI CHAY BANG DIEU KHIEN NHAP LIEU VA THONG KE TOAN 10
 echo ====================================================================
 echo.
 
-REM 1. Tu dong them Node.js neu chua co trong PATH
+REM 1. Them thu muc uv vao PATH
+set "UV_DIR=%USERPROFILE%\.local\bin"
+if exist "%UV_DIR%\uv.exe" (
+    set "PATH=%UV_DIR%;!PATH!"
+    echo [OK] Phat hien uv tai: %UV_DIR%\uv.exe
+) else (
+    echo [!] Khong tim thay uv. Dang cai dat uv...
+    powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+    if exist "%UV_DIR%\uv.exe" (
+        set "PATH=%UV_DIR%;!PATH!"
+        echo [OK] Da cai dat uv thanh cong.
+    ) else (
+        echo [!] Khong the cai dat uv. Vui long cai thu cong tai https://docs.astral.sh/uv/
+        pause
+        exit /b 1
+    )
+)
+
+REM 2. Them Node.js neu chua co trong PATH
 if exist "C:\Program Files\nodejs" (
     set "PATH=C:\Program Files\nodejs;!PATH!"
 )
 
-REM 2. Tu dong them cac thu muc Python pho bien vao PATH
-if exist "%LOCALAPPDATA%\Python\bin" (
-    set "PATH=%LOCALAPPDATA%\Python\bin;!PATH!"
-)
-for /d %%D in ("%LOCALAPPDATA%\Python\pythoncore-*") do (
-    if exist "%%D" set "PATH=%%D;%%D\Scripts;!PATH!"
-)
-for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python*") do (
-    if exist "%%D" set "PATH=%%D;%%D\Scripts;!PATH!"
-)
-for /d %%D in ("C:\Program Files\Python*") do (
-    if exist "%%D" set "PATH=%%D;%%D\Scripts;!PATH!"
-)
-
-REM 3. Xac dinh lenh Python (Kiem tra kha nang thuc thi thuc te)
-set "PYTHON_CMD="
-
-for %%C in (python3.14-64.exe python3.14.exe python.exe py.exe) do (
-    if "!PYTHON_CMD!"=="" (
-        where %%C >nul 2>nul
-        if !errorlevel! equ 0 (
-            %%C -c "import sys" >nul 2>nul
-            if !errorlevel! equ 0 (
-                set "PYTHON_CMD=%%C"
-                echo [OK] Phat hien lenh Python hop le: %%C
-            )
-        )
-    )
-)
-
-if "!PYTHON_CMD!"=="" (
-    echo [!] Khong tim thay trinh thong dich Python kha dung trong PATH.
-    echo Vui long kiem tra lai duong dan Python hoac mo file run_local.bat de sua.
-    pause
-    exit /b 1
-)
-
-REM 4. Kiem tra Node.js va npm
+REM 3. Kiem tra Node.js va npm
 where npm >nul 2>nul
 if !errorlevel! neq 0 (
     echo [!] Khong tim thay lenh npm hoac Node.js.
@@ -61,9 +42,18 @@ if !errorlevel! neq 0 (
 )
 echo [OK] Phat hien Node.js va npm san sang.
 
+REM 4. Kiem tra/tao virtual environment Python voi uv
+if not exist ".venv" (
+    echo [*] Dang tao Python virtual environment voi uv...
+    uv sync
+    echo [OK] Da tao .venv va cai dat cac thu vien Python.
+) else (
+    echo [OK] Virtual environment .venv da ton tai.
+)
+
 echo.
-echo [1/2] Dang khoi chay Backend FastAPI voi !PYTHON_CMD! tai http://localhost:8000 ...
-start "Backend FastAPI" /d "%~dp0" cmd /k "!PYTHON_CMD! -m pip install -r requirements.txt && !PYTHON_CMD! -m uvicorn backend.app.main:app --reload --port 8000"
+echo [1/2] Dang khoi chay Backend FastAPI (uv run uvicorn) tai http://localhost:8000 ...
+start "Backend FastAPI" /d "%~dp0" cmd /k "uv run uvicorn backend.app.main:app --reload --port 8000"
 
 echo [2/2] Dang khoi chay Frontend Vite React tai http://localhost:5173 ...
 cd /d "%~dp0frontend"
@@ -77,7 +67,7 @@ cd /d "%~dp0"
 echo.
 echo ====================================================================
 echo Da gui lenh khoi dong thanh cong!
-echo - Trinh thong dich Python: !PYTHON_CMD!
+echo - Quan ly Python: uv (virtual environment .venv)
 echo - Giao dien trang web:     http://localhost:5173
 echo - Tai lieu API Swagger:    http://localhost:8000/docs
 echo ====================================================================

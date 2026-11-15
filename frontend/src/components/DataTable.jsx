@@ -68,10 +68,10 @@ export default function DataTable({
         <div>
           <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Database className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            Bảng lưu trữ các mẫu số liệu (CSV Database)
+            Bảng lưu trữ các mẫu số liệu
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Lưu vĩnh viễn trong file CSV trên server, hỗ trợ tìm kiếm, lọc và phân tích lại bất cứ lúc nào
+            Lưu vĩnh viễn trong cơ sở dữ liệu SQLite trên server, hỗ trợ tìm kiếm, lọc và phân tích lại bất cứ lúc nào
           </p>
         </div>
       </div>

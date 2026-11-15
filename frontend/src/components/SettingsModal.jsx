@@ -18,7 +18,7 @@ export default function SettingsModal({ isOpen, onClose, onResetDemoData }) {
   if (!isOpen) return null;
 
   const handleReset = async () => {
-    if (window.confirm('Bạn có chắc chắn muốn làm sạch toàn bộ dữ liệu đã lưu trong cơ sở dữ liệu CSV?')) {
+    if (window.confirm('Bạn có chắc chắn muốn làm sạch toàn bộ dữ liệu đã lưu trong cơ sở dữ liệu?')) {
       setResetting(true);
       await onResetDemoData();
       setResetting(false);
@@ -60,16 +60,16 @@ export default function SettingsModal({ isOpen, onClose, onResetDemoData }) {
 
         {/* Content body */}
         <div className="p-5 max-h-[70vh] overflow-y-auto space-y-6">
-          {/* Section 1: Quản lý dữ liệu CSV */}
+          {/* Section 1: Quản lý cơ sở dữ liệu */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5" />
-              1. Quản lý cơ sở dữ liệu CSV
+              1. Quản lý cơ sở dữ liệu SQLite
             </h4>
             <div className="bg-slate-50 dark:bg-slate-850 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  Làm sạch dữ liệu trong CSV
+                  Làm sạch cơ sở dữ liệu
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                   Xóa tất cả các mẫu số liệu đã lưu và đưa cơ sở dữ liệu về trạng thái trống ban đầu.
@@ -89,7 +89,7 @@ export default function SettingsModal({ isOpen, onClose, onResetDemoData }) {
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  {resetting ? 'Đang xóa...' : 'Làm sạch CSV'}
+                  {resetting ? 'Đang xóa...' : 'Làm sạch dữ liệu'}
                 </button>
               </div>
             </div>

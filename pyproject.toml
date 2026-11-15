@@ -1,0 +1,17 @@
+[project]
+name = "math-statistics-dashboard"
+version = "1.0.0"
+description = "Bảng điều khiển thống kê Toán 10 - Kết nối tri thức với cuộc sống"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.4.0",
+    "python-multipart>=0.0.6",
+]
+
+[tool.uv]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

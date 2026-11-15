@@ -585,7 +585,7 @@ export default function DataEntryForm({
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   <CheckCircle className="w-4 h-4" />
-                  Đã lưu vào CSV!
+                  Đã lưu thành công!
                 </span>
                 <button
                   type="button"
@@ -612,7 +612,7 @@ export default function DataEntryForm({
               className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm hover:shadow transition-all"
             >
               <Save className="w-4 h-4" />
-              {isSaving ? 'Đang lưu...' : currentDataset?.id && !String(currentDataset.id).startsWith('local-') ? 'Cập nhật CSV' : 'Lưu vào CSV'}
+              {isSaving ? 'Đang lưu...' : currentDataset?.id && !String(currentDataset.id).startsWith('local-') ? 'Cập nhật' : 'Lưu mẫu số liệu'}
             </button>
           </div>
         </div>
