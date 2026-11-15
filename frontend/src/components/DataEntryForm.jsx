@@ -13,13 +13,17 @@ import {
   Upload,
   FileSpreadsheet,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Edit3,
+  PlusCircle
 } from 'lucide-react';
 import MathFormula from './MathFormula';
 import { parseRawData } from '../utils/statsCalculator';
 
 export default function DataEntryForm({ 
   currentDataset, 
+  isEditing = false,
+  onCancelEdit,
   onSave, 
   onDataChange,
   onNewDataset,
@@ -256,7 +260,14 @@ export default function DataEntryForm({
     const success = await onSave(payload);
     if (success) {
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      setTimeout(() => setSaveSuccess(false), 3500);
+      // Khi lưu một mẫu số liệu mới, tự động làm sạch form để người dùng có thể nhập tiếp mẫu tiếp theo mà không bị ghi đè
+      if (!isEditing) {
+        setName('');
+        setRawData('');
+        setNotes('');
+        setExcelError('');
+      }
     }
   };
 
@@ -281,15 +292,50 @@ export default function DataEntryForm({
           {/* Nút Thêm mẫu số liệu mới — reset form + tạo dataset mới (không ghi đè mẫu cũ) */}
           <button
             type="button"
-            onClick={handleClear}
+            onClick={() => {
+              if (onCancelEdit) onCancelEdit();
+              handleClear();
+            }}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:text-white hover:bg-emerald-600 dark:hover:bg-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 rounded-lg transition-all border border-emerald-300 dark:border-emerald-800"
             title="Xóa form và bắt đầu nhập mẫu số liệu mới (mẫu đã lưu không bị mất)"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Thêm mẫu số liệu mới
+            <PlusCircle className="w-3.5 h-3.5" />
+            Nhập mẫu số liệu mới
           </button>
         </div>
       </div>
+
+      {/* Banner thông báo trạng thái chỉnh sửa hoặc thêm mới */}
+      {isEditing ? (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 mb-5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs shadow-xs">
+          <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-200 font-semibold">
+            <span className="p-1 rounded-md bg-amber-200 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200">
+              <Edit3 className="w-4 h-4" />
+            </span>
+            <span>
+              Đang chỉnh sửa bài toán: <strong>"{currentDataset?.name}"</strong> (khi lưu sẽ cập nhật nội dung của bài toán này)
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (onCancelEdit) onCancelEdit();
+              handleClear();
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 font-semibold transition-colors shrink-0"
+          >
+            <PlusCircle className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+            <span>Hủy sửa • Nhập mẫu mới</span>
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Chế độ nhập mẫu mới (các mẫu đã lưu trước đó được giữ nguyên an toàn trong danh sách)
+          </span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Row 1: Tên mẫu số liệu & Chế độ nhập */}
@@ -585,7 +631,7 @@ export default function DataEntryForm({
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                   <CheckCircle className="w-4 h-4" />
-                  Đã lưu thành công!
+                  {isEditing ? 'Đã cập nhật bài toán thành công!' : 'Đã lưu mẫu vào danh sách!'}
                 </span>
                 <button
                   type="button"
@@ -612,7 +658,7 @@ export default function DataEntryForm({
               className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm hover:shadow transition-all"
             >
               <Save className="w-4 h-4" />
-              {isSaving ? 'Đang lưu...' : currentDataset?.id && !String(currentDataset.id).startsWith('local-') ? 'Cập nhật' : 'Lưu mẫu số liệu'}
+              {isSaving ? 'Đang lưu...' : isEditing ? 'Cập nhật bài toán' : 'Lưu mẫu số liệu'}
             </button>
           </div>
         </div>

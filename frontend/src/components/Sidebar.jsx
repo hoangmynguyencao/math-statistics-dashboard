@@ -19,6 +19,7 @@ export default function Sidebar({
   activeTab,
   setActiveTab,
   onQuickAdd,
+  onNewDataset,
   isDarkMode,
   toggleDarkMode,
   isOpenMobile,
@@ -63,6 +64,9 @@ export default function Sidebar({
   const handleNavClick = (id) => {
     if (id === 'settings') {
       onOpenSettings();
+    } else if (id === 'entry') {
+      if (onNewDataset) onNewDataset();
+      setActiveTab('entry');
     } else {
       setActiveTab(id);
     }

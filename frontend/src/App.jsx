@@ -40,6 +40,7 @@ export default function App() {
   // Data state: Hoàn toàn không nạp mẫu số liệu có sẵn, để người dùng tự nhập
   const [datasets, setDatasets] = useState([]);
   const [activeDataset, setActiveDataset] = useState(null);
+  const [editingDataset, setEditingDataset] = useState(null); // null = Thêm mẫu mới; object = Chỉnh sửa mẫu cụ thể
   const [statsPreview, setStatsPreview] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [apiOnline, setApiOnline] = useState(false);
@@ -115,32 +116,27 @@ export default function App() {
   // Thêm mẫu số liệu mới (người dùng tự nhập từ đầu)
   const handleQuickAdd = () => {
     handleNewDataset();
+  };
+
+  // Bắt đầu nhập mẫu số liệu mới (không gán id để luôn gọi POST tạo mẫu mới)
+  const handleNewDataset = () => {
+    setEditingDataset(null);
+    setStatsPreview(null);
     setActiveTab('entry');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Reset form về trạng thái mới (không id) để lần lưu tiếp sẽ POST tạo mới thay vì PUT cập nhật
-  const handleNewDataset = () => {
-    setActiveDataset({
-      name: '',
-      mode: 'simple',
-      raw_data: '',
-      notes: ''
-    });
-    setStatsPreview(null);
-  };
-
-  // Xử lý lưu mẫu số liệu mới hoặc cập nhật
+  // Xử lý lưu mẫu số liệu mới (POST) hoặc cập nhật mẫu đang sửa (PUT)
   const handleSaveDataset = async (payload) => {
     setIsSaving(true);
-    const existingId = activeDataset?.id;
-    const isExistingBackend = existingId && !String(existingId).startsWith('local-');
+    const isEditMode = Boolean(editingDataset?.id && !String(editingDataset.id).startsWith('local-'));
+    const editId = editingDataset?.id;
 
     try {
-      const url = isExistingBackend
-        ? `${API_BASE}/api/datasets/${existingId}`
+      const url = isEditMode
+        ? `${API_BASE}/api/datasets/${editId}`
         : `${API_BASE}/api/datasets`;
-      const method = isExistingBackend ? 'PUT' : 'POST';
+      const method = isEditMode ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
         method,
@@ -151,12 +147,13 @@ export default function App() {
       if (res.ok) {
         const savedItem = await res.json();
         setDatasets(prev =>
-          isExistingBackend
+          isEditMode
             ? prev.map(d => d.id === savedItem.id ? savedItem : d)
             : [savedItem, ...prev.filter(d => d.id !== savedItem.id)]
         );
         setActiveDataset(savedItem);
         setStatsPreview(savedItem.stats);
+        setEditingDataset(null); // Luôn thoát khỏi chế độ sửa sau khi lưu thành công!
         setIsSaving(false);
         return true;
       }
@@ -166,8 +163,9 @@ export default function App() {
 
     // Fallback lưu cục bộ nếu backend chưa bật
     const clientStats = computeStatistics(payload.raw_data, payload.mode);
+    const localId = isEditMode ? editId : 'local-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
     const updatedItem = {
-      id: existingId || 'local-' + Date.now().toString(36),
+      id: localId,
       name: payload.name,
       mode: payload.mode,
       raw_data: payload.raw_data,
@@ -177,12 +175,13 @@ export default function App() {
     };
 
     setDatasets(prev =>
-      existingId
-        ? prev.map(d => d.id === existingId ? updatedItem : d)
+      isEditMode
+        ? prev.map(d => d.id === localId ? updatedItem : d)
         : [updatedItem, ...prev]
     );
     setActiveDataset(updatedItem);
     setStatsPreview(clientStats);
+    setEditingDataset(null);
     setIsSaving(false);
     return true;
   };
@@ -210,6 +209,9 @@ export default function App() {
       setActiveDataset(remaining);
       setStatsPreview(remaining ? remaining.stats : null);
     }
+    if (editingDataset?.id && idSet.has(editingDataset.id)) {
+      setEditingDataset(null);
+    }
   };
 
   // Xóa mẫu số liệu
@@ -223,14 +225,20 @@ export default function App() {
     const updated = datasets.filter(d => d.id !== id);
     setDatasets(updated);
     if (activeDataset?.id === id) {
-      setActiveDataset(updated.length > 0 ? updated[0] : null);
-      setStatsPreview(updated.length > 0 ? updated[0].stats : null);
+      const remaining = updated.length > 0 ? updated[0] : null;
+      setActiveDataset(remaining);
+      setStatsPreview(remaining ? remaining.stats : null);
+    }
+    if (editingDataset?.id === id) {
+      setEditingDataset(null);
     }
   };
 
-  // Chỉnh sửa mẫu số liệu
+  // Chỉnh sửa mẫu số liệu: đưa mẫu vào editingDataset và mở tab nhập liệu
   const handleEditDataset = (dataset) => {
+    setEditingDataset(dataset);
     setActiveDataset(dataset);
+    setStatsPreview(dataset.stats);
     setActiveTab('entry');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -244,6 +252,7 @@ export default function App() {
     }
     setDatasets([]);
     setActiveDataset(null);
+    setEditingDataset(null);
     setStatsPreview(null);
   };
 
@@ -266,6 +275,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onQuickAdd={handleQuickAdd}
+        onNewDataset={handleNewDataset}
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleDarkMode}
         isOpenMobile={isOpenMobile}
@@ -445,12 +455,14 @@ export default function App() {
           )}
 
           {/* ============================================================== */}
-          {/* TAB 2: NHẬP LIỆU (Chỉ hiện phần nhập mẫu số liệu, lưu file CSV, không hiện gì khác) */}
+          {/* TAB 2: NHẬP LIỆU & QUẢN LÝ DANH SÁCH MẪU SỐ LIỆU */}
           {/* ============================================================== */}
           {activeTab === 'entry' && (
-            <div ref={entryFormRef}>
+            <div className="space-y-6" ref={entryFormRef}>
               <DataEntryForm
-                currentDataset={activeDataset}
+                currentDataset={editingDataset}
+                isEditing={Boolean(editingDataset?.id)}
+                onCancelEdit={() => setEditingDataset(null)}
                 onSave={handleSaveDataset}
                 onDataChange={handleDataChange}
                 onNewDataset={handleNewDataset}
@@ -458,6 +470,33 @@ export default function App() {
                 statsPreview={statsPreview}
                 isSaving={isSaving}
               />
+
+              {/* Danh sách tất cả mẫu số liệu đã lưu */}
+              {datasets.length > 0 && (
+                <div className="pt-2 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                      Danh sách các mẫu số liệu đã lưu ({datasets.length})
+                    </h3>
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Có thể chỉnh sửa hoặc xóa từng mẫu, hoặc chọn nhiều mẫu để xóa đồng thời
+                    </span>
+                  </div>
+                  <DataTable
+                    datasets={datasets}
+                    onSelectDataset={(item) => {
+                      setActiveDataset(item);
+                      setStatsPreview(item.stats);
+                      setActiveTab('dashboard');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    onDeleteDataset={handleDeleteDataset}
+                    onEditDataset={handleEditDataset}
+                    activeDatasetId={editingDataset?.id || activeDataset?.id}
+                    onDeleteMultiple={handleDeleteMultiple}
+                  />
+                </div>
+              )}
             </div>
           )}
 
