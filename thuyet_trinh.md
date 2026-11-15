@@ -1,6 +1,8 @@
 # 📊 Bảng Điều Khiển Thống Kê Toán 10
 ## Bài Thuyết Trình Giới Thiệu Dự Án
 
+> *Ứng dụng web thống kê tự động theo chuẩn chương trình GDPT 2018 — SGK Toán 10 Kết nối tri thức với cuộc sống*
+
 ---
 
 # PHẦN 1
@@ -10,172 +12,360 @@
 
 ## Đây là gì?
 
-> **Một trang web miễn phí, chạy trực tiếp trên trình duyệt, giúp học sinh và giáo viên tính toán thống kê theo đúng chương trình Toán 10 (SGK Kết nối tri thức với cuộc sống — GDPT 2018) một cách tự động, chính xác và trực quan.**
+> **Một web application (ứng dụng web) full-stack chạy trực tuyến, cho phép học sinh và giáo viên nhập mẫu số liệu thống kê và nhận kết quả phân tích tự động — bao gồm các số đặc trưng, lời giải công thức, biểu đồ trực quan — theo đúng chuẩn kiến thức Toán 10 (GDPT 2018).**
 
-Thay vì tính tay từng bước dễ nhầm lẫn, bạn chỉ cần **nhập dãy số liệu** — trang web tự động tính toán và trình bày toàn bộ lời giải với công thức đẹp mắt.
+Thay vì tính tay từng bước dễ nhầm lẫn, người dùng chỉ cần **nhập dữ liệu** — hệ thống tự động xử lý và render toàn bộ kết quả.
 
 ---
 
 ## Vấn đề cần giải quyết
 
-| ❌ Cách cũ (tính tay) | ✅ Với trang web này |
+| ❌ Cách cũ (tính tay) | ✅ Với ứng dụng này |
 |---|---|
-| Sắp xếp dãy số thủ công, dễ nhầm | Tự động sắp xếp ngay khi nhập |
+| Sắp xếp dãy số thủ công, dễ nhầm | Tự động sort ngay khi nhập |
 | Tính trung vị, tứ phân vị mất nhiều bước | Cho kết quả tức thì, có lời giải từng bước |
-| Khó phát hiện số liệu bất thường | Tự động đánh dấu và cảnh báo giá trị ngoại lệ |
-| Không có biểu đồ | Biểu đồ hộp & biểu đồ cột tự động |
-| Phải tính lại từ đầu mỗi lần | Lưu nhiều bài toán, xem lại bất cứ lúc nào |
+| Khó phát hiện số liệu bất thường | Tự động detect & alert giá trị ngoại lệ |
+| Không có biểu đồ | Biểu đồ hộp & biểu đồ cột render tự động |
+| Phải tính lại từ đầu mỗi lần | Persistent storage — lưu nhiều mẫu, truy vấn bất cứ lúc nào |
 
 ---
 
-## Ai có thể dùng?
+## Đối tượng sử dụng
 
 - 🎓 **Học sinh THPT** — Làm bài tập, kiểm tra kết quả, học công thức
 - 👩‍🏫 **Giáo viên** — Soạn ví dụ, kiểm tra đáp án, minh họa trên lớp
-- 📱 **Mọi thiết bị** — Máy tính, điện thoại, máy tính bảng
+- 📱 **Mọi thiết bị** — Responsive design: máy tính, điện thoại, máy tính bảng
 
 ---
 
 # PHẦN 2
-# 🛠️ CÔNG NGHỆ & KIẾN TRÚC
+# 🛠️ CÔNG NGHỆ & KIẾN TRÚC HỆ THỐNG
 
 ---
 
-## Tổng quan kiến trúc — "Nhà có 2 tầng"
+## Mô hình kiến trúc tổng thể
+
+Ứng dụng được xây dựng theo mô hình **Client–Server Architecture** kết hợp **Monorepo**, trong đó toàn bộ mã nguồn frontend và backend được quản lý trong cùng một repository Git.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    TRÌNH DUYỆT CỦA BẠN                      │
-│                                                             │
-│   ┌─────────────────────────────────────────────────────┐   │
-│   │              TẦNG TRÊN — FRONTEND                   │   │
-│   │         (Giao diện người dùng nhìn thấy)            │   │
-│   │                                                     │   │
-│   │   React 18  •  Tailwind CSS  •  KaTeX  •  Lucide    │   │
-│   └────────────────────┬────────────────────────────────┘   │
-│                        │ Gửi/nhận dữ liệu qua API           │
-│   ┌────────────────────▼────────────────────────────────┐   │
-│   │              TẦNG DƯỚI — BACKEND                    │   │
-│   │          (Xử lý tính toán & lưu trữ)                │   │
-│   │                                                     │   │
-│   │          FastAPI (Python)  •  SQLite                │   │
-│   └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     CLIENT (Trình duyệt)                        │
+│                                                                 │
+│   ┌─────────────────────────────────────────────────────────┐   │
+│   │              PRESENTATION LAYER — FRONTEND              │   │
+│   │         Single Page Application (SPA)                   │   │
+│   │                                                         │   │
+│   │   React 18  ·  Tailwind CSS  ·  KaTeX  ·  Lucide        │   │
+│   │   Component-based UI  ·  State Management (useState)    │   │
+│   └────────────────────┬────────────────────────────────────┘   │
+└───────────────────────┼─────────────────────────────────────────┘
+                        │ HTTP/REST API  (JSON payload)
+                        │ XMLHttpRequest / Fetch API
+┌───────────────────────┼─────────────────────────────────────────┐
+│                       │      SERVER                             │
+│   ┌───────────────────▼────────────────────────────────────┐   │
+│   │              APPLICATION LAYER — BACKEND               │   │
+│   │                 FastAPI (Python)                        │   │
+│   │   RESTful API  ·  Pydantic Validation  ·  CORS         │   │
+│   │   Business Logic  ·  Statistical Algorithms            │   │
+│   └───────────────────┬────────────────────────────────────┘   │
+│                       │ SQL Queries (sqlite3)                   │
+│   ┌───────────────────▼────────────────────────────────────┐   │
+│   │               DATA LAYER — PERSISTENCE                 │   │
+│   │                   SQLite Database                       │   │
+│   │          database.sqlite  ·  CRUD Operations           │   │
+│   └────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+> **Giải thích đơn giản**: Hệ thống có 3 tầng — tầng **giao diện** (người dùng thấy), tầng **xử lý nghiệp vụ** (tính toán), và tầng **lưu trữ dữ liệu**. Ba tầng giao tiếp với nhau qua các giao thức chuẩn.
+
+---
+
+## Tầng Giao diện — Frontend (Presentation Layer)
+
+> **Frontend = Những gì người dùng nhìn thấy và tương tác. Toàn bộ chạy trong trình duyệt của người dùng.**
+
+### ⚛️ React 18 — UI Library
+
+**Thuật ngữ học thuật:** React là một **declarative, component-based JavaScript library** do Meta phát triển, triển khai kiến trúc **Virtual DOM** (DOM ảo) để tối ưu hóa quá trình re-render giao diện.
+
+**Các khái niệm kỹ thuật được áp dụng:**
+- **Component Architecture**: Giao diện được chia thành các component độc lập, tái sử dụng được (`Sidebar`, `DataEntryForm`, `BoxPlotChart`, `StatisticsSummary`...).
+- **State Management**: Dùng `useState` và `useRef` hook để quản lý trạng thái ứng dụng (mẫu số liệu đang chọn, chế độ dark/light, dữ liệu form...).
+- **Side Effects**: `useEffect` hook xử lý side effects (gọi API khi component mount, sync dữ liệu khi state thay đổi).
+- **Unidirectional Data Flow**: Dữ liệu chảy một chiều từ parent component xuống child qua props, sự kiện đi ngược lại qua callback functions.
+- **SPA (Single Page Application)**: Toàn bộ ứng dụng chỉ load một lần, điều hướng giữa các tab không gây reload trang.
+
+> **Giải thích đơn giản**: React giúp giao diện **cập nhật tức thì** mà không cần tải lại trang — khi bạn nhập số, kết quả hiện ngay lập tức nhờ cơ chế Virtual DOM thông minh.
+
+---
+
+### 🎨 Tailwind CSS — Utility-First CSS Framework
+
+**Thuật ngữ học thuật:** Tailwind CSS là một **utility-first CSS framework** sử dụng phương pháp thiết kế **atomic CSS** — mỗi class CSS chỉ thực hiện đúng một nhiệm vụ cụ thể (ví dụ: `text-sm`, `rounded-xl`, `shadow-lg`), khác với framework truyền thống BEM hay Bootstrap.
+
+**Các tính năng được áp dụng:**
+- **Responsive Design** với breakpoints (`sm:`, `md:`, `lg:`): Giao diện tự thích ứng với mọi kích thước màn hình.
+- **Dark Mode** (`dark:` prefix): Chuyển đổi theme không cần viết thêm CSS riêng.
+- **JIT (Just-In-Time) Compiler**: Chỉ generate các class CSS thực sự được dùng → bundle size nhỏ.
+- **Custom Design System**: `tailwind.config.js` mở rộng palette màu, spacing, font-size theo chuẩn thiết kế riêng.
+
+> **Giải thích đơn giản**: Tailwind giúp web **đẹp và responsive** trên mọi màn hình, hỗ trợ cả Light Mode và Dark Mode mà không cần viết thêm code CSS phức tạp.
+
+---
+
+### 📐 KaTeX — Mathematical Typesetting Library
+
+**Thuật ngữ học thuật:** KaTeX là thư viện **client-side mathematical typesetting** hiệu năng cao, render công thức toán học từ cú pháp **LaTeX** (tiêu chuẩn de-facto trong xuất bản học thuật) thành SVG/HTML.
+
+**Ưu điểm kỹ thuật so với MathJax:**
+- Render nhanh hơn ~100 lần nhờ **synchronous rendering** (không cần chờ tải font).
+- Không phụ thuộc DOM — render hoàn toàn **deterministic**.
+- Font Computer Modern chuẩn TeX, đúng chuẩn hiển thị SGK.
+
+> **Giải thích đơn giản**: Thay vì hiện chữ xấu `x_bar = sum/n`, KaTeX hiển thị: $\bar{x} = \dfrac{\sum x_i}{n}$ — đẹp và đúng chuẩn sách giáo khoa.
+
+---
+
+### 📊 XLSX (SheetJS) — Spreadsheet Parser
+
+**Thuật ngữ học thuật:** SheetJS là thư viện **pure JavaScript** để parse và serialize các định dạng spreadsheet (`.xlsx`, `.xls`, `.csv`, `.ods`). Toàn bộ quá trình xử lý diễn ra **client-side** (trong trình duyệt), không upload file lên server → đảm bảo **data privacy**.
+
+**Thuật toán nhận diện định dạng tự động:**
+- Phân tích **aspect ratio** của sheet (số hàng vs số cột).
+- Detect header row bằng cách kiểm tra kiểu dữ liệu (string vs number).
+- Heuristic để phân biệt **cột dọc** (tall matrix) và **hàng ngang** (wide matrix).
+
+> **Giải thích đơn giản**: Thư viện này đọc file Excel ngay trong trình duyệt và nhận diện tự động cả bảng dọc lẫn bảng ngang — không cần upload file lên máy chủ.
+
+---
+
+## Tầng Xử lý nghiệp vụ — Backend (Application Layer)
+
+> **Backend = "Bếp núc" — toàn bộ tính toán & lưu trữ diễn ra ở đây, người dùng không thấy trực tiếp.**
+
+### 🐍 Python 3.10+ — Programming Language
+
+**Thuật ngữ học thuật:** Python là ngôn ngữ lập trình **interpreted, dynamically typed, garbage-collected** với cú pháp đơn giản và hệ sinh thái thư viện phong phú, đặc biệt mạnh trong **scientific computing** và **data processing**.
+
+**Vai trò trong dự án:**
+- **Statistical Algorithms**: Triển khai các thuật toán tính toán thống kê (mean, median, quartile, variance, standard deviation, outlier detection) đúng theo định nghĩa SGK Toán 10.
+- **f-string formatting**: Sinh chuỗi LaTeX động cho lời giải công thức KaTeX.
+- **Type Hints (PEP 484)**: Khai báo kiểu dữ liệu tường minh để tăng độ tin cậy.
+
+**Lưu ý kỹ thuật — Python 3.14 compatibility:**
+> Cú pháp f-string chặt hơn từ Python 3.14: ký tự `{,}` trong LaTeX bị parser hiểu nhầm là biểu thức Python rỗng → phải escape thành `{{,}}`.
+
+---
+
+### ⚡ FastAPI — Web Framework
+
+**Thuật ngữ học thuật:** FastAPI là **modern, high-performance Python web framework** xây dựng trên **ASGI** (Asynchronous Server Gateway Interface) — chuẩn giao thức server Python thế hệ mới (kế thừa WSGI). FastAPI sử dụng **type annotations** của Python kết hợp **Pydantic** để tự động validate request/response và sinh tài liệu **OpenAPI (Swagger UI)**.
+
+**Các tính năng được áp dụng trong dự án:**
+
+| Tính năng | Mô tả kỹ thuật |
+|-----------|---------------|
+| **RESTful API Design** | 5 endpoints CRUD: `GET/POST/PUT/DELETE /api/datasets`, `POST /api/stats/calculate` |
+| **Pydantic Models** | Schema validation tự động cho request body & response (`DatasetCreate`, `DatasetUpdate`, `StatsResult`) |
+| **CORS Middleware** | Cross-Origin Resource Sharing — cho phép frontend (`:5173`) gọi backend (`:8000`) trong môi trường development |
+| **Static File Serving** | Mount `frontend/dist` để phục vụ React SPA build trong production — không cần web server riêng (Nginx/Apache) |
+| **Async/Await** | Các endpoint được định nghĩa là `async def` để tận dụng non-blocking I/O |
+| **Lifespan Events** | `@app.on_event("startup")` khởi tạo database schema khi server start |
+
+**RESTful API Endpoints:**
+```
+GET    /api/health              → Kiểm tra trạng thái server
+GET    /api/datasets            → Lấy danh sách tất cả mẫu số liệu
+POST   /api/datasets            → Tạo mới mẫu số liệu (HTTP 201 Created)
+GET    /api/datasets/{id}       → Lấy chi tiết 1 mẫu theo ID
+PUT    /api/datasets/{id}       → Cập nhật mẫu số liệu
+DELETE /api/datasets/{id}       → Xóa mẫu số liệu
+POST   /api/stats/calculate     → Tính thống kê tức thì (không lưu DB)
+POST   /api/datasets/reset      → Xóa toàn bộ dữ liệu
+```
+
+> **Giải thích đơn giản**: FastAPI là "nhà ga" nhận yêu cầu từ giao diện, kiểm tra dữ liệu hợp lệ, rồi điều phối tính toán và lưu trữ.
+
+---
+
+### 🗄️ SQLite — Relational Database
+
+**Thuật ngữ học thuật:** SQLite là **embedded, serverless, self-contained RDBMS** (Relational Database Management System) — không cần tiến trình server riêng, toàn bộ database lưu trong 1 file nhị phân duy nhất (`database.sqlite`). Module `sqlite3` tích hợp sẵn trong Python standard library (không cần `pip install`).
+
+**Database Schema:**
+```sql
+CREATE TABLE IF NOT EXISTS datasets (
+    id          TEXT PRIMARY KEY,     -- UUID tự sinh
+    name        TEXT NOT NULL,        -- Tên bài toán
+    mode        TEXT NOT NULL,        -- 'raw' | 'frequency'
+    raw_data    TEXT NOT NULL,        -- Dữ liệu gốc (JSON string)
+    notes       TEXT DEFAULT '',      -- Ghi chú
+    n           INTEGER,              -- Cỡ mẫu
+    mean        REAL,                 -- Số trung bình x̄
+    median      REAL,                 -- Trung vị Mₑ
+    q1          REAL,                 -- Tứ phân vị Q₁
+    q3          REAL,                 -- Tứ phân vị Q₃
+    variance    REAL,                 -- Phương sai s²
+    std_dev     REAL,                 -- Độ lệch chuẩn s
+    created_at  TEXT                  -- Timestamp ISO 8601
+);
+```
+
+**Các thao tác CRUD được triển khai:**
+- **Create**: `INSERT INTO datasets VALUES (...)` — lưu mẫu mới, tính toán thống kê trước khi insert.
+- **Read**: `SELECT * FROM datasets ORDER BY created_at DESC` — lấy danh sách, hỗ trợ filter theo ID.
+- **Update**: `UPDATE datasets SET ... WHERE id = ?` — cập nhật mẫu, tái tính toán thống kê.
+- **Delete**: `DELETE FROM datasets WHERE id = ?` — xóa theo ID.
+
+**Auto-migration từ CSV:** Khi khởi động lần đầu, hệ thống kiểm tra file `datasets.csv` cũ — nếu tồn tại, tự động migrate toàn bộ dữ liệu sang SQLite rồi archive file CSV.
+
+> **Giải thích đơn giản**: SQLite là "cuốn sổ tay điện tử" lưu trữ vĩnh viễn các bài toán của bạn, tích hợp sẵn trong Python nên không cần cài thêm bất kỳ phần mềm nào.
+
+---
+
+### 📦 uv — Python Package & Environment Manager
+
+**Thuật ngữ học thuật:** `uv` là **modern Python package installer and resolver** được viết bằng **Rust**, phát triển bởi Astral. `uv` triển khai thuật toán **dependency resolution** nhanh hơn `pip` ~10–100 lần nhờ:
+- **Parallel downloading**: Tải đồng thời nhiều package.
+- **Global cache**: Reuse package đã tải — không download lại.
+- **Lock file** (`uv.lock`): Ghi chính xác hash & version của từng dependency → **reproducible builds** (cài trên máy khác cho ra kết quả y hệt).
+
+**Cấu hình dự án (`pyproject.toml` — chuẩn PEP 517/518/621):**
+```toml
+[project]
+name = "math-statistics-dashboard"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.4.0",
+    "python-multipart>=0.0.6",
+]
+```
+
+> **Giải thích đơn giản**: `uv` là công cụ cài thư viện Python thế hệ mới — nhanh hơn pip ~100 lần và đảm bảo chương trình chạy ổn định trên mọi máy tính.
+
+---
+
+## Luồng dữ liệu — Request/Response Lifecycle
+
+```
+[Người dùng nhập số]
+         │
+         ▼
+[React: onChange handler]
+  → Cập nhật state (useState)
+  → Re-render: hiển thị preview (sort, cỡ mẫu n)
+         │
+         │ [Nhấn "Lưu mẫu số liệu"]
+         ▼
+[React: onSubmit → fetch() / XMLHttpRequest]
+  → HTTP POST /api/datasets
+  → Request body: { name, mode, raw_data, notes }
+         │
+         ▼
+[FastAPI: POST /api/datasets endpoint]
+  → Pydantic validation (DatasetCreate schema)
+  → Gọi calculate_statistics() → Python algorithm
+  → Gọi save_dataset_item() → SQL INSERT
+  → Return: DatasetResponse (JSON)
+         │
+         ▼
+[SQLite: database.sqlite]
+  → Persist dữ liệu + kết quả thống kê
+         │
+         ▼
+[FastAPI: HTTP 201 Created + JSON response]
+         │
+         ▼
+[React: .then() callback]
+  → Update state: datasets list, activeDataset
+  → Re-render: KPI Cards, Charts, Formula table
+  → Hiển thị: "Đã lưu thành công!"
 ```
 
 ---
 
-## Tầng trên — Frontend (Giao diện)
+## Kiến trúc Production — "Làm sao web chạy trên Internet?"
 
-> **Frontend = Những gì bạn nhìn thấy và tương tác trên màn hình.**
+Điểm đặc biệt về mặt kỹ thuật: hệ thống sử dụng **single-service deployment** — FastAPI tự phục vụ cả API lẫn static files của React SPA.
 
-### ⚛️ React 18
-- Thư viện JavaScript phổ biến nhất thế giới để xây dựng giao diện web.
-- Giúp giao diện **cập nhật tức thì** mà không cần tải lại trang — khi bạn nhập số, kết quả hiện ngay lập tức.
-- Do **Meta (Facebook)** phát triển và duy trì.
+```python
+# main.py — FastAPI mount React build
+if FRONTEND_DIST_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST_DIR / "assets"))
 
-### 🎨 Tailwind CSS
-- Bộ công cụ thiết kế giúp web **đẹp, gọn và responsive** (hiển thị tốt trên mọi màn hình).
-- Tạo ra phong cách **Clean Dashboard** chuyên nghiệp, hỗ trợ cả Light Mode (sáng) và Dark Mode (tối).
-
-### 📐 KaTeX
-- Thư viện hiển thị **công thức toán học chuẩn LaTeX** sắc nét, đúng định dạng SGK.
-- Thay vì hiện chữ xấu `x_bar = sum/n`, nó hiển thị: $\bar{x} = \dfrac{\sum x_i}{n}$
-
-### 🎯 Lucide React
-- Bộ hơn 1.000 icon vector sắc nét, phù hợp với mọi kích thước màn hình.
-
-### 📊 XLSX (SheetJS)
-- Thư viện đọc file Excel (`.xlsx`, `.xls`) ngay trong trình duyệt — không cần upload lên server.
-
----
-
-## Tầng dưới — Backend (Xử lý & Lưu trữ)
-
-> **Backend = "Bếp núc" — người dùng không nhìn thấy nhưng mọi tính toán đều diễn ra ở đây.**
-
-### 🐍 Python + FastAPI
-- **Python** là ngôn ngữ lập trình nổi tiếng, dễ đọc, cực mạnh trong tính toán khoa học.
-- **FastAPI** là framework Python để xây dựng API — "cầu nối" giữa giao diện và cơ sở dữ liệu.
-- Toàn bộ thuật toán thống kê (trung bình, trung vị, tứ phân vị, phương sai...) được tính chính xác ở đây.
-
-### 🗄️ SQLite
-- Cơ sở dữ liệu nhỏ gọn, **tích hợp sẵn trong Python** — không cần cài thêm phần mềm nào.
-- Lưu trữ tất cả mẫu số liệu bạn đã nhập vào file `database.sqlite` ngay trên server.
-- Giống như một "cuốn sổ tay điện tử" lưu trữ vĩnh viễn các bài toán của bạn.
-
-### 📦 uv (Quản lý môi trường Python)
-- Công cụ thế hệ mới để quản lý các thư viện Python — **nhanh hơn pip truyền thống ~100 lần**.
-- Tự động tạo môi trường ảo (`.venv`) đảm bảo chương trình chạy ổn định trên mọi máy.
-
----
-
-## Luồng dữ liệu — "Dữ liệu đi đâu khi bạn nhập số?"
-
-```
-Bạn nhập số liệu
-       │
-       ▼
-  React (Frontend)
-  → Hiển thị preview tức thì (sắp xếp, cỡ mẫu n)
-       │
-       │  Nhấn "Lưu mẫu số liệu"
-       ▼
-  FastAPI (Backend)
-  → Nhận dữ liệu
-  → Chạy thuật toán tính toán thống kê (Python)
-  → Lưu vào SQLite
-  → Trả kết quả về
-       │
-       ▼
-  React (Frontend)
-  → Hiển thị KPI Cards, công thức KaTeX, Biểu đồ
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        file_path = FRONTEND_DIST_DIR / full_path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(FRONTEND_DIST_DIR / "index.html")  # SPA fallback
 ```
 
----
-
-## Triển khai — "Làm sao web chạy được trên Internet?"
+**Lợi ích:**
+- **Không cần reverse proxy** (Nginx/Apache): 1 process duy nhất phục vụ cả frontend + backend.
+- **Không có CORS issue** trong production: Frontend và API cùng origin.
+- **Tiết kiệm tài nguyên**: Phù hợp với gói **Free Tier** của Render.
 
 ```
-┌─────────────┐    push code    ┌─────────────┐    auto deploy   ┌──────────────┐
-│   Máy tính  │ ──────────────▶ │   GitHub    │ ───────────────▶ │    Render    │
-│  (VS Code)  │                 │ (Kho mã)    │                  │  (Server)    │
-└─────────────┘                 └─────────────┘                  └──────────────┘
-                                                                        │
-                                                                        ▼
+┌─────────────┐    git push     ┌─────────────┐    webhook     ┌──────────────┐
+│   Dev       │ ──────────────▶ │   GitHub    │ ─────────────▶ │    Render    │
+│  Machine    │                 │ (Remote     │    trigger     │  CI/CD Build │
+│             │                 │  Repository)│                │              │
+└─────────────┘                 └─────────────┘                └──────┬───────┘
+                                                                       │
+                                                            build.sh:  │
+                                                            1. uv pip install
+                                                            2. npm install
+                                                            3. npm run build
+                                                                       │
+                                                                       ▼
+                                                               ┌───────────────┐
+                                                               │  Web Service  │
+                                                               │  (Python 3.13)│
+                                                               │  Port: $PORT  │
+                                                               │               │
+                                                               │  FastAPI      │
+                                                               │  + React dist │
+                                                               └───────────────┘
+                                                                       │
                                                                URL công khai:
-                                                       math-statistics-dashboard
-                                                              .onrender.com
+                                                       https://math-statistics-
+                                                        dashboard.onrender.com
 ```
-
-| Công cụ | Vai trò | Chi phí |
-|---------|---------|---------|
-| **GitHub** | Lưu trữ mã nguồn, quản lý phiên bản | Miễn phí |
-| **Render** | Chạy web server trên Internet 24/7 | Miễn phí |
 
 ---
 
-## Tóm tắt công nghệ
+## Tổng quan Stack công nghệ
 
 ```
-📦 DỰ ÁN
+📦 TECHNOLOGY STACK
 │
-├── 🖥️  FRONTEND (Giao diện)
-│   ├── React 18          → Xây dựng UI động, cập nhật tức thì
-│   ├── Tailwind CSS      → Thiết kế đẹp, Responsive, Dark Mode
-│   ├── KaTeX             → Hiển thị công thức toán chuẩn SGK
-│   ├── Lucide React      → Bộ icon vector chuyên nghiệp
-│   └── XLSX (SheetJS)    → Đọc file Excel trong trình duyệt
+├── 🖥️  FRONTEND — Presentation Layer
+│   ├── React 18          → Declarative UI, Virtual DOM, Component Architecture
+│   ├── Vite 5            → Modern build tool, HMR (Hot Module Replacement)
+│   ├── Tailwind CSS      → Utility-first CSS, Responsive, Dark Mode
+│   ├── KaTeX             → Client-side LaTeX typesetting
+│   ├── Lucide React      → SVG icon library
+│   └── XLSX (SheetJS)    → Client-side spreadsheet parser
 │
-├── ⚙️  BACKEND (Xử lý)
-│   ├── Python 3.10+      → Ngôn ngữ lập trình tính toán
-│   ├── FastAPI           → API kết nối Frontend & Backend
-│   ├── SQLite            → Cơ sở dữ liệu lưu mẫu số liệu
-│   └── uv                → Quản lý môi trường Python
+├── ⚙️  BACKEND — Application & Data Layer
+│   ├── Python 3.10+      → Business logic, Statistical algorithms
+│   ├── FastAPI           → ASGI web framework, RESTful API, OpenAPI docs
+│   ├── Pydantic v2       → Data validation & serialization
+│   ├── SQLite (sqlite3)  → Embedded RDBMS, persistent storage
+│   ├── Uvicorn           → ASGI server (production & development)
+│   └── uv                → Package manager (Rust-based, lock file)
 │
-└── 🚀 TRIỂN KHAI
-    ├── GitHub            → Lưu trữ & quản lý mã nguồn
-    └── Render            → Hosting miễn phí trên Internet
+└── 🚀 INFRASTRUCTURE — DevOps & Deployment
+    ├── Git               → Version control (distributed VCS)
+    ├── GitHub            → Remote repository, source of truth
+    ├── Render            → PaaS (Platform-as-a-Service), free tier
+    ├── build.sh          → CI build script (Bash)
+    └── render.yaml       → Infrastructure-as-Code (IaC) config
 ```
 
 ---
@@ -193,57 +383,53 @@ Bạn nhập số liệu
 ├──────────────────┬──────────────────────────────────────────────┤
 │                  │                                              │
 │   SIDEBAR        │            NỘI DUNG CHÍNH                   │
-│   (Bên trái)     │            (Bên phải)                        │
+│   (Navigation)   │      (Main Content / Workspace)             │
 │                  │                                              │
-│  🏠 Trang chủ    │   ← Nội dung thay đổi tùy tab bạn chọn      │
+│  🏠 Trang chủ    │   ← Nội dung thay đổi tùy tab (SPA routing) │
 │  📊 Tổng quan    │                                              │
 │  ✏️  Nhập liệu   │                                              │
 │  📈 Báo cáo      │                                              │
 │                  │                                              │
 │  [+ Thêm mới]    │                                              │
 │                  │                                              │
-│  🗄️ Cơ sở dữ    │                                              │
-│     liệu SQLite  │                                              │
+│  🗄️ SQLite DB    │                                              │
+│     (Connected)  │                                              │
 └──────────────────┴──────────────────────────────────────────────┘
 ```
 
 ---
 
-## Bước 1 — Mở trang web & Bắt đầu
+## Bước 1 — Truy cập & Khởi động
 
-1. Truy cập link web (ví dụ: `https://math-statistics-dashboard.onrender.com`)
-2. Bạn sẽ thấy **Trang chủ** với banner giới thiệu và 6 tính năng nổi bật.
-3. Nhấn nút **"NHẤN ĐỂ BẮT ĐẦU THỐNG KÊ"** để vào không gian làm việc.
-
----
-
-## Bước 2 — Nhập dãy số liệu
-
-### Vào tab "Nhập liệu mới" trên Sidebar bên trái
+1. Truy cập URL công khai (ví dụ: `https://math-statistics-dashboard.onrender.com`)
+2. SPA được hydrate — bạn thấy **Trang chủ** với banner giới thiệu.
+3. Nhấn **"NHẤN ĐỂ BẮT ĐẦU THỐNG KÊ"** → Router chuyển vào workspace.
 
 ---
 
-### Cách A: Nhập dãy số thông thường
+## Bước 2 — Nhập mẫu số liệu (Tab "Nhập liệu mới")
 
-Chọn chế độ **"Dãy số liệu"**, rồi gõ trực tiếp các số:
+### Chế độ A: Dãy số liệu thô (Raw Data Mode)
+
+Chọn **"Dãy số liệu"** → gõ trực tiếp:
 
 ```
-Ví dụ bài toán: Điểm kiểm tra Toán của 12 học sinh:
+Ví dụ: Điểm kiểm tra Toán 12 học sinh
 
   7.5; 8.0; 6.5; 9.0; 8.5; 7.0; 8.0; 9.5; 4.0; 8.5; 1.5; 10.0
 
-👉 Có thể ngăn cách bằng:  dấu phẩy ","  hoặc  chấm phẩy ";"  hoặc  khoảng trắng
+Delimiter được hỗ trợ:  dấu phẩy ","  |  dấu chấm phẩy ";"  |  khoảng trắng
 ```
 
-**Ngay khi gõ**, hệ thống tự động hiện bên dưới:
-- ✅ Cỡ mẫu: **n = 12**
-- ✅ Dãy sắp xếp không giảm: `1.5; 4.0; 6.5; 7.0; 7.5; 8.0; 8.0; 8.5; 8.5; 9.0; 9.5; 10.0`
+**Real-time processing** (xử lý tức thì khi nhập):
+- Parser tách chuỗi → mảng số thực → sort ascending
+- Tính cỡ mẫu `n = 12` và hiển thị dãy đã sắp xếp
 
 ---
 
-### Cách B: Nhập bảng phân bố tần số
+### Chế độ B: Bảng tần số (Frequency Table Mode)
 
-Chọn chế độ **"Có tần số"**, rồi nhập mỗi dòng theo dạng `Giá trị : Tần số`:
+Chọn **"Có tần số"** → nhập theo dạng `value: frequency`:
 
 ```
 Ví dụ: Số con trong mỗi gia đình (40 hộ)
@@ -254,215 +440,224 @@ Ví dụ: Số con trong mỗi gia đình (40 hộ)
   3: 5
   4: 1
 
-→ Hệ thống tự tính: n = 4 + 12 + 18 + 5 + 1 = 40
+→ n = Σnᵢ = 4 + 12 + 18 + 5 + 1 = 40
+  Parser tự động expand thành dãy số đầy đủ trước khi tính
 ```
 
 ---
 
-### Cách C: Nhập từ file Excel 📂
-
-1. Nhấn nút **"Nhập từ Excel (.xlsx / .xls)"**
-2. Chọn file Excel trên máy tính của bạn
-3. Hệ thống **tự động nhận diện** cấu trúc dữ liệu:
+### Chế độ C: Import từ Excel (File Upload + Client-side Parse)
 
 ```
-Dạng CỘT DỌC (thông thường):        Dạng HÀNG NGANG (chuẩn SGK):
-┌────┬────┐                          ┌────┬────┬────┬────┬────┐
-│ xi │ ni │                          │ xi │ 0  │ 1  │ 2  │ 3  │
-├────┼────┤                          ├────┼────┼────┼────┼────┤
-│  0 │  4 │                          │ ni │ 4  │ 12 │ 18 │ 5  │
-│  1 │ 12 │                          └────┴────┴────┴────┴────┘
+Nhấn "Nhập từ Excel (.xlsx / .xls)"
+→ File API (browser) → ArrayBuffer
+→ XLSX.read() → WorkBook object → Sheet data
+→ Heuristic detection algorithm:
+```
+
+**Thuật toán nhận diện định dạng tự động:**
+
+```
+Dạng CỘT DỌC (Portrait / Vertical):     Dạng HÀNG NGANG (Landscape / Horizontal):
+┌────┬────┐                             ┌────┬────┬────┬────┬────┐
+│ xi │ ni │  ← Header row (auto-skip)  │ xi │ 0  │ 1  │ 2  │ 3  │
+├────┼────┤                             ├────┼────┼────┼────┼────┤
+│  0 │  4 │                             │ ni │ 4  │ 12 │ 18 │ 5  │
+│  1 │ 12 │                             └────┴────┴────┴────┴────┘
 │  2 │ 18 │
-│  3 │  5 │     ← Cả 2 dạng đều đọc được tự động ✅
+│  3 │  5 │     Cả 2 dạng → auto-detect & parse ✅
 └────┴────┘
+
+Logic: IF cols > rows → Hàng ngang ELSE → Cột dọc
 ```
 
 ---
 
-## Bước 3 — Lưu mẫu số liệu
+## Bước 3 — Lưu vào Database
 
-1. Nhập **Tên bài toán** (ví dụ: *"Điểm Toán lớp 10A1 - HK1"*)
-2. Thêm **Ghi chú** nếu muốn
-3. Nhấn nút **"Lưu mẫu số liệu"**
+1. Nhập **Tên bài toán** (metadata) + **Ghi chú** (optional)
+2. Nhấn **"Lưu mẫu số liệu"** → gửi `HTTP POST /api/datasets`
 
-**Sau khi lưu thành công:**
+**Vòng đời request (Request Lifecycle):**
+```
+Client → POST /api/datasets { name, mode, raw_data }
+       ← 201 Created { id, name, stats..., created_at }
+```
 
+**Sau khi nhận response thành công:**
 ```
 ✅ Đã lưu thành công!
 
 [Nhập mẫu tiếp theo]    [Xem báo cáo →]
 ```
 
-- Nhấn **"Nhập mẫu tiếp theo"** → Làm mới form để nhập bài toán khác
-- Nhấn **"Xem báo cáo →"** → Chuyển sang xem kết quả phân tích ngay
+> **Nút thay đổi nhãn theo context:**
+> - **"Lưu mẫu số liệu"** → khi `activeDataset.id` không tồn tại (POST)
+> - **"Cập nhật"** → khi đang chỉnh sửa mẫu cũ (PUT)
 
 ---
 
-## Bước 4 — Xem kết quả tại tab "Báo cáo & Thống kê"
+## Bước 4 — Xem kết quả (Tab "Báo cáo & Thống kê")
 
-### 4.1. Mẫu số liệu sau khi nhập
-
-Phần đầu trang hiển thị:
+### 4.1. Data Summary Panel
 
 ```
-📋 DÃY SỐ GỐC:
-1.5  4.0  7.0  7.5  8.0  8.0  8.5  8.5  9.0  9.5  10.0
-(+ 6.5 bị bỏ sót trong ví dụ — đây là minh họa)
+📋 DÃY SỐ GỐC (raw input):
+1.5  4.0  7.0  7.5  8.0  8.0  8.5  8.5  9.0  9.5  10.0 ...
 
-📋 DÃY SỐ SẮP XẾP KHÔNG GIẢM:
+📋 DÃY SỐ SẮP XẾP KHÔNG GIẢM (sorted array):
 1.5  4.0  6.5  7.0  7.5  8.0  8.0  8.5  8.5  9.0  9.5  10.0
- 🔴          ← Giá trị ngoại lệ được đánh dấu đỏ
+ 🔴  🔴                                               ← Outliers được highlight
 
-📋 BẢNG PHÂN BỐ TẦN SỐ & TẦN SUẤT
+📋 BẢNG PHÂN BỐ TẦN SỐ & TẦN SUẤT (Frequency Distribution Table)
 
-📋 5 SỐ TÓM TẮT:  Min | Q₁ | Q₂ | Q₃ | Max
+📋 5 SỐ TÓM TẮT (Five-Number Summary):
+     Min  |   Q₁   |   Q₂   |   Q₃   |   Max
+     1.5  |  6.875  |  8.0   |  8.75  |  10.0
 ```
 
 ---
 
-### 4.2. Bốn thẻ KPI (Chỉ số chính)
+### 4.2. KPI Dashboard Cards
 
 ```
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│  Cỡ mẫu    │  │  Trung bình │  │   Trung vị  │  │  Khoảng     │
-│             │  │             │  │             │  │  tứ phân vị │
-│    n = 12   │  │  x̄ = 7.75  │  │  Mₑ = 8.0   │  │  ΔQ = 1.75  │
-└─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│  Sample Size │  │     Mean     │  │    Median    │  │     IQR      │
+│              │  │              │  │              │  │              │
+│    n = 12    │  │  x̄ = 7.75   │  │  Mₑ = 8.0   │  │  ΔQ = 1.875  │
+└──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘
 ```
 
 ---
 
-### 4.3. Cảnh báo giá trị ngoại lệ
-
-Nếu có số liệu bất thường, hệ thống cảnh báo ngay:
+### 4.3. Outlier Detection Alert
 
 ```
 ⚠️  PHÁT HIỆN 2 GIÁ TRỊ NGOẠI LỆ
 
-Điều kiện: x < Q₁ - 1,5×ΔQ  hoặc  x > Q₃ + 1,5×ΔQ
-           x < 6.25 - 2.625        x > 8.0 + 2.625
-           x < 3.625               x > 10.625
+Điều kiện IQR Rule:
+  Lower fence = Q₁ - 1.5 × IQR = 6.875 - 1.5 × 1.875 = 4.0625
+  Upper fence = Q₃ + 1.5 × IQR = 8.75  + 1.5 × 1.875 = 11.5625
 
-→ Giá trị ngoại lệ tìm được: 1.5 ; 4.0
+→ x < 4.0625 hoặc x > 11.5625
+→ Giá trị ngoại lệ: { 1.5 }
 ```
 
 ---
 
-### 4.4. Lời giải công thức KaTeX từng bước
+### 4.4. KaTeX Formula Rendering — Lời giải từng bước
 
-Mỗi số đặc trưng được trình bày đầy đủ theo chuẩn SGK:
+Mỗi số đặc trưng được render với **3 lớp thông tin**:
 
 ```
-SỐ TRUNG BÌNH CỘNG (x̄)
+1. Công thức tổng quát (general formula):
+   x̄ = (1/n) × Σᵢxᵢ
 
-Công thức:        x̄ = (x₁ + x₂ + ... + xₙ) / n
+2. Phép thế số (substitution step):
+   x̄ = (1.5 + 4.0 + 6.5 + ... + 10.0) / 12
+     = 93.0 / 12
 
-Thế số:           x̄ = (1.5 + 4.0 + 6.5 + ... + 10.0) / 12
-                     = 93.0 / 12
-
-Kết quả:          x̄ ≈ 7.75
+3. Kết quả (result):
+   x̄ ≈ 7.75
 ```
 
-*(Hiển thị đẹp bằng KaTeX chuẩn LaTeX trong trang web thực)*
+*(Render bằng KaTeX thành LaTeX chuẩn trong trang web thực)*
 
-**Tính toán đầy đủ cho tất cả:**
-- $\bar{x}$ (Số trung bình), $M_e$ (Trung vị)
-- $Q_1, Q_2, Q_3$ (Tứ phân vị), $M_o$ (Mốt)
-- $R$ (Khoảng biến thiên), $\Delta_Q$ (Khoảng tứ phân vị)
-- $s^2$ (Phương sai), $s$ (Độ lệch chuẩn)
+**Danh sách đầy đủ các số đặc trưng được tính:**
+
+| Nhóm | Ký hiệu | Tên |
+|------|---------|-----|
+| Xu thế trung tâm | $\bar{x}$ | Số trung bình cộng |
+| | $M_e$ | Trung vị |
+| | $Q_1, Q_2, Q_3$ | Tứ phân vị |
+| | $M_o$ | Mốt |
+| Độ phân tán | $R$ | Khoảng biến thiên |
+| | $\Delta_Q$ | Khoảng tứ phân vị (IQR) |
+| | $s^2$ | Phương sai mẫu |
+| | $s$ | Độ lệch chuẩn |
+| | $s_{n-1}^2$ | Phương sai hiệu chỉnh Bessel |
 
 ---
 
-### 4.5. Biểu đồ hộp (Box Plot)
+### 4.5. Box Plot — SVG Visualization
 
 ```
-        Q₁      Mₑ     Q₃
+        Q₁       Mₑ      Q₃
+     6.875      8.0    8.75
          │       │       │
- ○───────┼───────┼───────┼──────────── ─ ─ ─ ─ ○
-1.5    6.25    8.0    8.0  10.0              (ngoại lệ)
- 🔴                                              🔴
+ ○───────┼███████┼███████┼──────────── ─ ─ ─ ─ ○
+1.5   4.063     8.0    8.75  11.563          (ngoại lệ nếu có)
+ 🔴                                               🔴
 
-Giải thích:
-  ○  = Giá trị ngoại lệ (chấm đỏ)
- ─── = Râu (Whisker): vùng dữ liệu bình thường
- ███ = Thân hộp (Box): chứa 50% dữ liệu trung tâm
-  |  = Vạch giữa: Trung vị Mₑ
+Legend:
+  ●  = Outlier (IQR rule: x < Q₁-1.5ΔQ hoặc x > Q₃+1.5ΔQ)
+  ───= Whisker (vùng dữ liệu hợp lệ, non-outlier)
+  ███= Box (interquartile range — IQR, chứa 50% dữ liệu)
+  |  = Median line (Q₂)
 ```
 
-**Rê chuột vào chấm đỏ** để xem giá trị chính xác của điểm ngoại lệ.
+**Implementation**: Box plot được vẽ bằng **SVG thuần** (không dùng thư viện chart) — tính toán tọa độ dựa trên `viewBox` normalize về `[0, 1]`.
+
+**Interactive**: Hover chuột vào outlier point → hiện **tooltip** với giá trị chính xác.
 
 ---
 
-### 4.6. Biểu đồ cột tần số
+### 4.6. Frequency Bar Chart
 
 ```
-Tần số
-  │
-8 │      ████
-7 │      ████
-6 │      ████
-5 │      ████  ████
-4 │ ████  ████  ████
-3 │ ████  ████  ████
-2 │ ████  ████  ████  ████
-1 │ ████  ████  ████  ████  ████
-  └──────────────────────────────
-     1.5   4.0   6.5  7.0 ... 10.0
-```
-
----
-
-## Bước 5 — Quản lý nhiều mẫu số liệu
-
-### Tab "Tổng quan" — Bảng quản lý
-
-```
-┌────┬─────────────────────────┬────────┬───────────┬──────────┐
-│ #  │ Tên bài toán            │ Cỡ mẫu │ Trung bình│  Thao tác│
-├────┼─────────────────────────┼────────┼───────────┼──────────┤
-│ 1  │ Điểm Toán lớp 10A1     │  n=12  │  x̄=7.75   │ ✏️ 🗑️   │
-│ 2  │ Chiều cao học sinh      │  n=30  │  x̄=165.3  │ ✏️ 🗑️   │
-│ 3  │ Số con trong gia đình   │  n=40  │  x̄=1.675  │ ✏️ 🗑️   │
-└────┴─────────────────────────┴────────┴───────────┴──────────┘
-```
-
-- Nhấp vào dòng bất kỳ → Xem chi tiết mẫu số liệu đó
-- **✏️ Sửa** → Chỉnh sửa lại số liệu
-- **🗑️ Xóa** → Xóa khỏi cơ sở dữ liệu
-
-### Chuyển đổi nhanh trong trang Báo cáo
-
-```
-Đang xem: [Điểm Toán lớp 10A1 ▾]
-           ↓ Nhấn để chọn bài toán khác
-           ● Điểm Toán lớp 10A1
-           ○ Chiều cao học sinh
-           ○ Số con trong gia đình
+Freq │
+  8  │      ████
+  6  │      ████  ████
+  4  │ ████  ████  ████
+  2  │ ████  ████  ████  ████  ████
+  0  └──────────────────────────────
+       1.5   4.0   6.5  ...  10.0
+              xᵢ (Giá trị)
 ```
 
 ---
 
-## Bước 6 — Chuyển Dark Mode / Light Mode
+## Bước 5 — Quản lý Dataset (Tab "Tổng quan")
 
-Nhấn nút **🌙** (trên góc phải màn hình) để chuyển giữa chế độ sáng và tối.
+### DataTable Component — CRUD Interface
+
+```
+┌────┬──────────────────────────┬────────┬───────────┬──────────┐
+│ #  │ Tên bài toán             │ n      │   x̄       │ Actions  │
+├────┼──────────────────────────┼────────┼───────────┼──────────┤
+│ 1  │ Điểm Toán lớp 10A1      │  12    │  7.75     │ ✏️ 🗑️   │
+│ 2  │ Chiều cao học sinh       │  30    │  165.3    │ ✏️ 🗑️   │
+│ 3  │ Số con trong gia đình    │  40    │  1.675    │ ✏️ 🗑️   │
+└────┴──────────────────────────┴────────┴───────────┴──────────┘
+
+Filter: [🔍 Tìm kiếm...] [Lọc theo chế độ ▾] [Sắp xếp theo ▾]
+```
+
+**Thao tác:**
+- Nhấp vào dòng → `GET /api/datasets/{id}` → load vào `activeDataset` state
+- **✏️ Sửa** → Pre-fill form → `PUT /api/datasets/{id}` khi lưu
+- **🗑️ Xóa** → Confirm dialog → `DELETE /api/datasets/{id}`
+
+### Dataset Selector trong trang Báo cáo
+
+```
+Đang xem: [Điểm Toán lớp 10A1 ▾]   ← Dropdown để switch dataset nhanh
+```
 
 ---
 
 ## Tổng hợp các nút & chức năng chính
 
-| Nút / Vị trí | Chức năng |
-|---|---|
-| **"NHẤN ĐỂ BẮT ĐẦU THỐNG KÊ"** | Vào không gian làm việc từ Trang chủ |
-| **"Thêm mẫu số liệu mới"** (Sidebar) | Làm mới form, bắt đầu nhập bài toán mới |
-| **"Nhập từ Excel"** | Đọc dữ liệu tự động từ file .xlsx/.xls |
-| **"Lưu mẫu số liệu"** | Lưu vào cơ sở dữ liệu SQLite |
-| **"Cập nhật"** | Lưu lại chỉnh sửa của mẫu đã có |
-| **"Nhập mẫu tiếp theo"** | Làm mới form sau khi lưu thành công |
-| **"Xem báo cáo →"** | Chuyển sang tab Báo cáo & Thống kê |
-| **✏️** (icon cây bút) | Sửa mẫu số liệu trong bảng |
-| **🗑️** (icon thùng rác) | Xóa mẫu số liệu khỏi cơ sở dữ liệu |
-| **⚙️** (icon bánh răng) | Mở cài đặt: xóa toàn bộ dữ liệu, xem công thức |
-| **🌙 / ☀️** | Chuyển Dark Mode / Light Mode |
+| Nút / Element | HTTP Method | Chức năng |
+|---|---|---|
+| **"Lưu mẫu số liệu"** | `POST /api/datasets` | Tạo mới dataset, lưu DB |
+| **"Cập nhật"** | `PUT /api/datasets/{id}` | Cập nhật dataset hiện tại |
+| **"Xem báo cáo →"** | — | Client-side route change |
+| **"Nhập mẫu tiếp theo"** | — | Reset form state |
+| **✏️** (Sửa) | — | Load dataset vào form |
+| **🗑️** (Xóa) | `DELETE /api/datasets/{id}` | Xóa khỏi SQLite |
+| **⚙️** (Cài đặt) | `POST /api/datasets/reset` | Xóa toàn bộ DB |
+| **🌙 / ☀️** | — | Toggle dark mode (localStorage) |
 
 ---
 
@@ -471,50 +666,75 @@ Nhấn nút **🌙** (trên góc phải màn hình) để chuyển giữa chế 
 
 ---
 
-## Các số đặc trưng được tính tự động
+## Các số đặc trưng được tính toán
 
-### Nhóm 1 — Đo xu thế trung tâm (Dữ liệu tập trung ở đâu?)
-
-| Ký hiệu | Tên | Ý nghĩa |
-|---------|-----|---------|
-| $\bar{x}$ | Số trung bình cộng | Giá trị "bình quân" của toàn bộ mẫu |
-| $M_e$ | Trung vị | Giá trị chính giữa khi sắp xếp tăng dần |
-| $Q_1, Q_2, Q_3$ | Tứ phân vị | Chia mẫu thành 4 phần bằng nhau |
-| $M_o$ | Mốt | Giá trị xuất hiện nhiều nhất |
-
-### Nhóm 2 — Đo độ phân tán (Dữ liệu trải rộng như thế nào?)
+### Nhóm 1 — Đo xu thế trung tâm (Measures of Central Tendency)
 
 | Ký hiệu | Tên | Ý nghĩa |
 |---------|-----|---------|
-| $R$ | Khoảng biến thiên | Hiệu số giữa Max và Min |
-| $\Delta_Q$ | Khoảng tứ phân vị | Độ rộng của 50% dữ liệu trung tâm |
-| $s^2$ | Phương sai | Mức độ phân tán trung bình (bình phương) |
-| $s$ | Độ lệch chuẩn | Mức độ phân tán trung bình (cùng đơn vị với dữ liệu) |
+| $\bar{x}$ | Số trung bình cộng (Mean) | Giá trị "bình quân" của toàn bộ mẫu |
+| $M_e$ | Trung vị (Median) | Giá trị chính giữa khi sort tăng dần |
+| $Q_1, Q_2, Q_3$ | Tứ phân vị (Quartiles) | Chia sorted array thành 4 phần bằng nhau |
+| $M_o$ | Mốt (Mode) | Giá trị có tần số xuất hiện cao nhất |
+
+### Nhóm 2 — Đo độ phân tán (Measures of Dispersion)
+
+| Ký hiệu | Tên | Ý nghĩa |
+|---------|-----|---------|
+| $R$ | Khoảng biến thiên (Range) | `max - min` — độ trải rộng toàn bộ |
+| $\Delta_Q$ | Khoảng tứ phân vị (IQR) | `Q₃ - Q₁` — độ trải rộng 50% trung tâm |
+| $s^2$ | Phương sai mẫu (Sample Variance) | Trung bình bình phương độ lệch |
+| $s$ | Độ lệch chuẩn (Standard Deviation) | Căn bậc hai của phương sai |
+| $s_{n-1}^2$ | Phương sai hiệu chỉnh (Bessel's Correction) | Ước lượng không thiên lệch của tổng thể |
 
 ---
 
-## Quy tắc phát hiện giá trị ngoại lệ
-
-Một giá trị được gọi là **ngoại lệ (bất thường)** nếu:
+## Quy tắc phát hiện giá trị ngoại lệ — IQR Method
 
 $$x < Q_1 - 1{,}5 \times \Delta_Q \quad \text{hoặc} \quad x > Q_3 + 1{,}5 \times \Delta_Q$$
 
-**Ví dụ trực quan:**
+```
+     Lower Fence              Upper Fence
+  Q₁ - 1.5×IQR            Q₃ + 1.5×IQR
+         │                        │
+─────────┼────────────────────────┼─────────
+         │←── Vùng bình thường ──→│
+○                                           ○
+(outlier min)                   (outlier max)
+```
+
+> **Lưu ý**: Đây là phương pháp **Tukey's Fences** (1977) — tiêu chuẩn trong thống kê mô tả, được SGK Toán 10 KNTT 2018 áp dụng.
+
+---
+
+## Thuật toán tính Tứ phân vị — Chuẩn SGK Toán 10 KNTT
+
+> **Quan trọng**: Có nhiều convention khác nhau để tính $Q_1, Q_3$. Chương trình này triển khai **đúng theo định nghĩa SGK Toán 10 Kết nối tri thức** (không phải cách tính của Excel hay một số máy tính khoa học).
 
 ```
-                    Vùng bình thường
-         ◄─────────────────────────────────►
-─────────┼──────────┼──────────┼────────────┼─────────
-      Q₁-1,5ΔQ     Q₁        Q₃         Q₃+1,5ΔQ
+Cho dãy số đã sắp xếp x₁ ≤ x₂ ≤ ... ≤ xₙ
 
-  ○                                                    ○
-(ngoại lệ nhỏ)                              (ngoại lệ lớn)
+Q₂ = Mₑ (trung vị toàn dãy)
+
+Khi n lẻ (n = 2k+1):
+  Q₂ = x_{k+1}
+  Nửa dưới: { x₁, ..., x_k }  (không gồm Q₂)
+  Nửa trên: { x_{k+2}, ..., x_{2k+1} }  (không gồm Q₂)
+  Q₁ = trung vị nửa dưới
+  Q₃ = trung vị nửa trên
+
+Khi n chẵn (n = 2k):
+  Q₂ = (x_k + x_{k+1}) / 2
+  Nửa dưới: { x₁, ..., x_k }
+  Nửa trên: { x_{k+1}, ..., x_{2k} }
+  Q₁ = trung vị nửa dưới
+  Q₃ = trung vị nửa trên
 ```
 
 ---
 
 # PHẦN 5
-# 🚀 ĐIỂM NỔI BẬT CỦA DỰ ÁN
+# 🚀 ĐIỂM NỔI BẬT
 
 ---
 
@@ -522,68 +742,75 @@ $$x < Q_1 - 1{,}5 \times \Delta_Q \quad \text{hoặc} \quad x > Q_3 + 1{,}5 \tim
 
 | Tiêu chí | Máy tính cầm tay | Excel | Trang web này |
 |----------|-----------------|-------|---------------|
-| Tốc độ tính toán | Chậm, nhiều bước | Trung bình | ⚡ Tức thì |
-| Lời giải công thức | ❌ Không | ❌ Không | ✅ Có (KaTeX chuẩn SGK) |
-| Phát hiện ngoại lệ | ❌ Phải tự tính | ⚠️ Phức tạp | ✅ Tự động, có cảnh báo |
-| Biểu đồ hộp (Box Plot) | ❌ Không | ⚠️ Khó vẽ | ✅ Tự động, có đánh dấu |
-| Nhập từ Excel | ❌ Không | — | ✅ Hỗ trợ cả cột dọc & hàng ngang |
-| Lưu nhiều bài toán | ❌ Không | ⚠️ Thủ công | ✅ Tự động, xem lại bất cứ lúc nào |
-| Truy cập từ điện thoại | ❌ Không | ❌ Không | ✅ Responsive mọi màn hình |
-| Chi phí | Mua máy | Mua license | 🆓 Miễn phí hoàn toàn |
+| Tốc độ tính toán | Chậm, nhiều bước | Trung bình | ⚡ Real-time |
+| Lời giải công thức | ❌ | ❌ | ✅ KaTeX từng bước |
+| Phát hiện outlier | ❌ Phải tự tính | ⚠️ Phức tạp | ✅ Tự động, visual alert |
+| Box Plot | ❌ | ⚠️ Khó vẽ chuẩn | ✅ SVG render, hover tooltip |
+| Import Excel | ❌ | — | ✅ Cột dọc + Hàng ngang |
+| Persistent storage | ❌ | ⚠️ Thủ công | ✅ SQLite, CRUD đầy đủ |
+| Responsive design | ❌ | ❌ | ✅ Mobile-first |
+| Chuẩn SGK Toán 10 | ❓ | ❌ Khác convention | ✅ 100% đúng định nghĩa |
+| Chi phí | Mua thiết bị | License | 🆓 Miễn phí |
 
 ---
 
 ## Điểm đặc biệt về mặt kỹ thuật
 
-- **1 Web Service duy nhất**: Backend FastAPI tự phục vụ cả API lẫn giao diện React — không cần 2 server riêng, không lỗi CORS.
-- **SQLite không cần cài thêm**: Cơ sở dữ liệu tích hợp sẵn trong Python, file `.sqlite` nhỏ gọn, dễ backup.
-- **uv thay pip**: Cài đặt thư viện Python nhanh hơn ~100 lần, lock file đảm bảo chạy ổn định trên mọi môi trường.
-- **Tự động migrate**: Nếu trước dùng CSV, hệ thống tự chuyển sang SQLite khi khởi động lần đầu.
-- **Thuật toán chuẩn 100%**: Đúng định nghĩa tứ phân vị theo SGK Toán 10 KNTT 2018 (không phải định nghĩa của Excel hay calculator).
+| Quyết định thiết kế | Lý do / Lợi ích |
+|---|---|
+| **Single-service deployment** (FastAPI serve React) | Không cần 2 server, không CORS issue, free tier Render |
+| **SQLite thay CSV** | ACID compliance, concurrent-safe, query linh hoạt |
+| **uv thay pip** | 100x faster install, reproducible builds qua lock file |
+| **SVG thuần cho Box Plot** | Không phụ thuộc chart library, full control, nhẹ hơn |
+| **Client-side Excel parse** | Data privacy — file không upload lên server |
+| **SPA với React Router** | UX mượt mà, không reload trang khi chuyển tab |
+| **Pydantic v2** | Validation nhanh, type-safe, tự động sinh OpenAPI docs |
 
 ---
 
-## Hành trình phát triển
+## Hành trình phát triển — AI-Assisted Development
 
 ```
-Prompt AI ban đầu (1 lần)
-        │
-        ▼
-   Code khởi tạo
-        │
-        ▼
-Phát hiện & sửa lỗi thực tế
-  • Lỗi f-string Python 3.14
-  • Lỗi nhận diện Python trên Windows
-  • Lỗi chỉ lưu được 1 mẫu số liệu
-  • Lỗi đổi tên bài toán
-        │
-        ▼
-Thêm tính năng theo nhu cầu thực tế
-  ✅ Homepage giới thiệu
-  ✅ Nhập Excel đa định dạng (cột dọc + hàng ngang)
-  ✅ Giao diện 3 tab riêng biệt
-  ✅ Chuyển CSV → SQLite
-  ✅ Dùng uv quản lý Python
-        │
-        ▼
-   Phiên bản hoàn chỉnh ✨
+[Prompt mô tả yêu cầu chi tiết]
+         │
+         ▼ AI generate code
+[Codebase khởi tạo] ──── Iteration 1
+         │
+         ▼ Test thực tế → phát hiện bugs
+  • SyntaxError: f-string Python 3.14
+  • Windows PATH: python stub vs real executable
+  • State bug: chỉ lưu được 1 mẫu (POST vs PUT nhầm)
+  • useEffect: sync form đè lên input đang gõ
+         │
+         ▼ Bug fixes + Feature requests
+  ✅ Homepage + demo data removed
+  ✅ Excel import (multi-format detection)
+  ✅ 3-tab layout (dashboard / entry / reports)
+  ✅ CSV → SQLite migration
+  ✅ pip → uv migration
+         │
+         ▼
+[Production-ready version] ──── GitHub ──── Render
 ```
+
+> **Takeaway**: AI-assisted development rút ngắn thời gian từ concept → deployment từ **tuần/tháng xuống vài giờ**. Tuy nhiên, **human review và iterative testing** vẫn không thể thiếu để đảm bảo correctness.
 
 ---
 
 # KẾT LUẬN
 
-> Dự án chứng minh rằng **AI có thể giúp tạo ra phần mềm giáo dục chất lượng cao** chỉ từ một câu prompt mô tả yêu cầu — không cần biết lập trình từ đầu.
+> Dự án là ví dụ thực tế về **AI-augmented software development** — kết hợp sức mạnh của Large Language Models trong việc sinh code với khả năng review và điều hướng của người dùng cuối.
 >
-> Từ ý tưởng → Trang web chạy được trên Internet: **trong vài giờ, với chi phí bằng 0**.
+> **Kết quả**: Từ một prompt mô tả yêu cầu → ứng dụng web full-stack production-ready, chạy miễn phí trên Internet — trong vài giờ, không cần background lập trình sâu.
 
 ---
 
-**🔗 Mã nguồn mở:** https://github.com/hoangmynguyencao/math-statistics-dashboard
+**🔗 Source code (MIT License):** https://github.com/hoangmynguyencao/math-statistics-dashboard
 
-**🌐 Truy cập trực tuyến:** https://math-statistics-dashboard.onrender.com
+**🌐 Live demo:** https://math-statistics-dashboard.onrender.com
+
+**📚 API Docs (Swagger UI):** https://math-statistics-dashboard.onrender.com/docs
 
 ---
 
-*Dự án phục vụ mục đích giáo dục, phi thương mại — Tự do sử dụng, chỉnh sửa và chia sẻ.*
+*Dự án phục vụ mục đích giáo dục, phi thương mại — Tự do sử dụng, chỉnh sửa và chia sẻ theo chuẩn chương trình GDPT 2018.*
