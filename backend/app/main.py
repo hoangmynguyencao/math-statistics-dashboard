@@ -21,6 +21,7 @@ from .storage import (
     save_dataset_item,
     update_dataset_item,
     delete_dataset_item,
+    delete_multiple_datasets,
     reset_to_demo_data
 )
 
@@ -115,6 +116,12 @@ async def delete_dataset(dataset_id: str):
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Không tìm thấy mẫu số liệu để xóa.")
     return {"message": "Đã xóa thành công mẫu số liệu.", "id": dataset_id}
+
+@app.post("/api/datasets/batch-delete")
+async def batch_delete_datasets(ids: list[str]):
+    """Xóa đồng thời nhiều mẫu số liệu khỏi SQLite."""
+    count = delete_multiple_datasets(ids)
+    return {"message": f"Đã xóa thành công {count} mẫu số liệu.", "deleted_count": count}
 
 @app.post("/api/datasets/reset")
 async def reset_datasets():

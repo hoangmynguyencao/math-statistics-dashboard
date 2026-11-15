@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Database, 
   Search, 
@@ -17,11 +17,13 @@ export default function DataTable({
   onSelectDataset, 
   onDeleteDataset, 
   onEditDataset, 
-  activeDatasetId 
+  activeDatasetId,
+  onDeleteMultiple
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMode, setFilterMode] = useState('all'); // all | simple | frequency | has_outliers
   const [sortBy, setSortBy] = useState('created_at_desc'); // created_at_desc | n_desc | mean_desc | name_asc
+  const [selectedIds, setSelectedIds] = useState(new Set());
 
   // Lọc và sắp xếp
   const filteredDatasets = useMemo(() => {
@@ -60,6 +62,52 @@ export default function DataTable({
         return 0;
       });
   }, [datasets, searchTerm, filterMode, sortBy]);
+
+  // Khi filteredDatasets thay đổi, loại bỏ selectedIds không còn tồn tại
+  useEffect(() => {
+    const filteredIds = new Set(filteredDatasets.map(d => d.id));
+    setSelectedIds(prev => {
+      const next = new Set([...prev].filter(id => filteredIds.has(id)));
+      if (next.size === prev.size) return prev; // không thay đổi → giữ nguyên tham chiếu
+      return next;
+    });
+  }, [filteredDatasets]);
+
+  // Checkbox logic
+  const allSelected = filteredDatasets.length > 0 && filteredDatasets.every(d => selectedIds.has(d.id));
+  const someSelected = filteredDatasets.some(d => selectedIds.has(d.id)) && !allSelected;
+
+  const selectAllRef = useRef(null);
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someSelected;
+    }
+  }, [someSelected]);
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredDatasets.map(d => d.id)));
+    }
+  };
+
+  const handleToggleRow = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBatchDelete = () => {
+    const n = selectedIds.size;
+    if (window.confirm(`Bạn có chắc muốn xóa ${n} mẫu đã chọn khỏi cơ sở dữ liệu?`)) {
+      onDeleteMultiple([...selectedIds]);
+      setSelectedIds(new Set());
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm">
@@ -121,11 +169,45 @@ export default function DataTable({
         </div>
       </div>
 
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 mb-3 px-3 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800">
+          <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 flex-1">
+            {selectedIds.size} mẫu đã chọn
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedIds(new Set())}
+            className="px-3 py-1 text-xs font-semibold rounded-md border border-indigo-400 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+          >
+            Bỏ chọn tất cả
+          </button>
+          <button
+            type="button"
+            onClick={handleBatchDelete}
+            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md bg-rose-600 hover:bg-rose-700 text-white transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Xóa {selectedIds.size} mẫu đã chọn
+          </button>
+        </div>
+      )}
+
       {/* Table Content */}
       <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
         <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
           <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-700">
             <tr>
+              <th className="py-2.5 px-3 text-center w-8">
+                <input
+                  ref={selectAllRef}
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={handleSelectAll}
+                  className="rounded border-slate-300 dark:border-slate-600 accent-indigo-600 cursor-pointer"
+                  title="Chọn tất cả"
+                />
+              </th>
               <th className="py-2.5 px-3">Tên bài toán / Mẫu</th>
               <th className="py-2.5 px-3 text-center">Cỡ mẫu (n)</th>
               <th className="py-2.5 px-3 text-center">Trung bình (<MathFormula formula="\bar{x}" />)</th>
@@ -138,7 +220,7 @@ export default function DataTable({
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {filteredDatasets.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-slate-400">
+                <td colSpan={8} className="py-8 text-center text-slate-400">
                   {datasets.length === 0
                     ? 'Chưa có mẫu số liệu nào được lưu trong cơ sở dữ liệu. Bạn hãy nhập mẫu số liệu đầu tiên ở form phía trên!'
                     : 'Không tìm thấy mẫu số liệu nào phù hợp với bộ lọc.'}
@@ -147,14 +229,24 @@ export default function DataTable({
             ) : (
               filteredDatasets.map((row) => {
                 const isActive = row.id === activeDatasetId;
+                const isSelected = selectedIds.has(row.id);
                 const outliers = row.stats?.outliers || [];
                 return (
                   <tr
                     key={row.id}
                     className={`hover:bg-slate-50 dark:hover:bg-slate-850/50 transition-colors ${
                       isActive ? 'bg-indigo-50/60 dark:bg-indigo-950/30' : ''
-                    }`}
+                    } ${isSelected ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''}`}
                   >
+                    <td className="py-3 px-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleToggleRow(row.id)}
+                        className="rounded border-slate-300 dark:border-slate-600 accent-indigo-600 cursor-pointer"
+                      />
+                    </td>
+
                     <td className="py-3 px-3">
                       <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
                         {isActive && (
@@ -226,8 +318,13 @@ export default function DataTable({
                         <button
                           type="button"
                           onClick={() => {
-                            if (window.confirm(`Bạn có chắc muốn xóa mẫu "${row.name}" khỏi cơ sở dữ liệu CSV?`)) {
+                            if (window.confirm(`Bạn có chắc muốn xóa mẫu "${row.name}" khỏi cơ sở dữ liệu?`)) {
                               onDeleteDataset(row.id);
+                              setSelectedIds(prev => {
+                                const next = new Set(prev);
+                                next.delete(row.id);
+                                return next;
+                              });
                             }
                           }}
                           className="p-1.5 rounded-md text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"

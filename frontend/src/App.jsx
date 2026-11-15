@@ -187,6 +187,31 @@ export default function App() {
     return true;
   };
 
+  // Xóa nhiều mẫu số liệu đồng thời (batch delete)
+  const handleDeleteMultiple = async (ids) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/datasets/batch-delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ids)
+      });
+      if (!res.ok) {
+        await Promise.all(ids.map(id => fetch(`${API_BASE}/api/datasets/${id}`, { method: 'DELETE' })));
+      }
+    } catch (e) {
+      console.warn('Xóa batch từ backend lỗi, xóa cục bộ:', e);
+    }
+
+    const idSet = new Set(ids);
+    const updated = datasets.filter(d => !idSet.has(d.id));
+    setDatasets(updated);
+    if (activeDataset?.id && idSet.has(activeDataset.id)) {
+      const remaining = updated.length > 0 ? updated[0] : null;
+      setActiveDataset(remaining);
+      setStatsPreview(remaining ? remaining.stats : null);
+    }
+  };
+
   // Xóa mẫu số liệu
   const handleDeleteDataset = async (id) => {
     try {
@@ -412,6 +437,7 @@ export default function App() {
                     onDeleteDataset={handleDeleteDataset}
                     onEditDataset={handleEditDataset}
                     activeDatasetId={activeDataset?.id}
+                    onDeleteMultiple={handleDeleteMultiple}
                   />
                 </>
               )}

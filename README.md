@@ -37,8 +37,13 @@ Trang web được thiết kế theo phong cách **Clean Dashboard** hiện đ�
 - **Trực quan hóa đồ thị**:
   - **Biểu đồ hộp (Box Plot)**: Tóm tắt 5 số đặc trưng ($Min, Q_1, Q_2, Q_3, Max$) và **làm nổi bật giá trị ngoại lệ** bằng chấm đỏ.
   - **Biểu đồ cột tần số (Frequency Bar Chart)**: Trực quan hóa phân bố tần số các phần tử.
-- **Lưu trữ SQLite vĩnh viễn**: Dữ liệu lưu xuống cơ sở dữ liệu SQLite (tích hợp sẵn trong Python), hỗ trợ lưu nhiều mẫu số liệu, chỉnh sửa và xóa — không cần cài thêm phần mềm cơ sở dữ liệu.
-- **Quản lý Python với uv**: Backend sử dụng `uv` — trình quản lý gói & môi trường Python thế hệ mới, nhanh hơn pip ~10–100 lần, có lock file chính xác.
+- **Lưu trữ SQLite vĩnh viễn**: Dữ liệu lưu xuống cơ sở dữ liệu SQLite (tích hợp sẵn trong Python), hỗ trợ lưu nhiều mẫu số liệu — không cần cài thêm phần mềm cơ sở dữ liệu ngoài.
+- **Quản lý danh sách mẫu số liệu linh hoạt**:
+  - Hiển thị bảng danh sách tất cả các bài toán đã lưu kèm công cụ tìm kiếm, lọc theo phân loại và sắp xếp.
+  - **Chỉnh sửa từng mẫu số liệu**: Nhấn nút Sửa để tải dữ liệu vào form và cập nhật lại.
+  - **Xóa từng mẫu số liệu**: Nhấn nút Xóa ở từng dòng để xóa riêng mẫu đó.
+  - **Xóa đồng thời nhiều mẫu số liệu (Batch Delete)**: Tích chọn checkbox ở từng dòng hoặc checkbox "Chọn tất cả" trên thanh tiêu đề, sau đó nhấn nút "Xóa các mẫu đã chọn" trên thanh thao tác hàng loạt.
+- **Quản lý Python với uv**: Backend sử dụng `uv` — trình quản lý môi trường & gói Python thế hệ mới, nhanh hơn pip ~10–100 lần, có lock file chính xác.
 
 ---
 
@@ -54,7 +59,7 @@ Dự án được xây dựng với mục tiêu giúp học sinh cấp 3 và gi�
 
 ### Bước 2: Câu Prompt ban đầu để yêu cầu AI viết code
 
-Dưới đây là toàn bộ nội dung câu prompt đã được sử dụng để yêu cầu AI sinh mã nguồn cho toàn bộ dự án:
+Dưới đây là toàn bộ nội dung câu prompt hoàn chỉnh đã được sử dụng để yêu cầu AI sinh mã nguồn cho toàn bộ dự án:
 
 ```text
 Hãy thiết kế và viết code hoàn chỉnh (React và Tailwind CSS cho frontend, Python cho backend,
@@ -78,7 +83,7 @@ Yêu cầu cụ thể như sau:
 2. Thanh điều khiển (Sidebar / Control Panel):
 - Các mục điều hướng riêng biệt gồm 4 tab chuyên biệt:
   + Trang chủ: Màn hình giới thiệu.
-  + Tổng quan: Chỉ hiển thị nội dung cơ bản của mẫu số liệu (Header tóm tắt, 4 thẻ KPI,
+  + Tổng quan: Hiển thị nội dung cơ bản của mẫu số liệu (Header tóm tắt, 4 thẻ KPI,
     dãy số tăng dần) và Bảng danh sách quản lý tất cả bài toán đã lưu.
   + Nhập liệu mới: Chỉ hiển thị duy nhất form nhập liệu, không có gì khác.
   + Báo cáo & Thống kê: Hiển thị toàn bộ báo cáo phân tích chi tiết.
@@ -128,12 +133,15 @@ hiển thị:
 - Biểu đồ cột tần số (Frequency Bar Chart): Phân bố tần số các phần tử.
 - Bộ chọn nhanh chuyển đổi giữa các mẫu số liệu đã lưu ngay trong trang báo cáo.
 
-4c. Bảng quản lý dữ liệu (Tab "Tổng quan"):
-- Hiển thị tất cả mẫu số liệu đã lưu, hỗ trợ tìm kiếm, lọc, sắp xếp.
-- Nút Sửa (icon cây bút) và Xóa (icon thùng rác) từng dòng.
+4c. Quản lý danh sách mẫu số liệu (Tab "Tổng quan" — DataTable):
+- Hiển thị toàn bộ các mẫu số liệu đã lưu dưới dạng bảng danh sách có tìm kiếm, lọc, sắp xếp.
+- Hỗ trợ chỉnh sửa từng mẫu số liệu (nút Sửa) để nạp lại vào form chỉnh sửa.
+- Hỗ trợ xóa từng mẫu số liệu (nút Xóa ở mỗi dòng).
+- Hỗ trợ chọn đồng thời nhiều mẫu số liệu bằng checkbox (ở từng dòng hoặc chọn tất cả)
+  và hiển thị thanh công cụ hàng loạt để xóa đồng thời tất cả các mẫu đã chọn (Batch Delete).
 
 5. Lưu trữ dữ liệu — Backend FastAPI + SQLite:
-- Backend: Python + FastAPI, RESTful API (GET/POST/PUT/DELETE /api/datasets).
+- Backend: Python + FastAPI, RESTful API (GET/POST/PUT/DELETE /api/datasets, POST /api/datasets/batch-delete).
 - Lưu trữ: SQLite qua module sqlite3 tích hợp sẵn trong Python (không cần cài thêm).
 - File cơ sở dữ liệu: backend/data/database.sqlite, tự động tạo khi khởi động lần đầu.
 - Quản lý môi trường Python bằng uv: pyproject.toml khai báo dependencies, uv.lock
@@ -194,7 +202,7 @@ mathapp/
 │   │   │   ├── Header.jsx             # Thanh tiêu đề trên
 │   │   │   ├── KPICards.jsx           # 4 Thẻ chỉ số nổi bật
 │   │   │   ├── DataEntryForm.jsx      # Form nhập liệu (Thủ công & Excel)
-│   │   │   ├── DataTable.jsx          # Bảng quản lý dữ liệu
+│   │   │   ├── DataTable.jsx          # Bảng quản lý dữ liệu (Checkbox, sửa, xóa, xóa đồng thời)
 │   │   │   ├── StatisticsSummary.jsx  # Công thức & lời giải KaTeX
 │   │   │   ├── BoxPlotChart.jsx       # Biểu đồ hộp & điểm ngoại lệ
 │   │   │   ├── FrequencyChart.jsx     # Biểu đồ cột tần số
@@ -377,14 +385,19 @@ git push -u origin main
 
 ---
 
-### 3.5. Lưu trữ và quản lý nhiều mẫu số liệu
+### 3.5. Lưu trữ và quản lý mẫu số liệu theo danh sách (Sửa / Xóa đơn / Xóa đồng thời)
 - Sau khi nhấn **"Lưu mẫu số liệu"** thành công, thông báo **"Đã lưu thành công!"** xuất hiện kèm nút **"Nhập mẫu tiếp theo"** và **"Xem báo cáo →"**.
 - Nhấn **"Nhập mẫu tiếp theo"** (hoặc **"Thêm mẫu số liệu mới"** ở góc trên form) để làm mới form và nhập bài toán tiếp theo.
-- Toàn bộ bài toán đã lưu hiển thị trong bảng tại tab **Tổng quan**:
-  - Nhấp vào dòng để xem mẫu số liệu đó.
-  - Nhấn **Sửa** (icon cây bút) để chỉnh sửa lại số liệu.
-  - Nhấn **Xóa** (icon thùng rác) để xóa khỏi cơ sở dữ liệu SQLite.
-- Để xóa toàn bộ dữ liệu: Vào **Cài đặt** (icon bánh răng trên Sidebar) → **"Làm sạch cơ sở dữ liệu"**.
+- Toàn bộ bài toán đã lưu được hiển thị tại bảng danh sách ở tab **Tổng quan**:
+  - **Xem chi tiết**: Nhấp vào biểu tượng con mắt (hoặc dòng mẫu) để chọn xem bài toán trên dashboard.
+  - **Chỉnh sửa từng mẫu số liệu**: Nhấn nút **Sửa** (icon cây bút ✏️) ở dòng tương ứng. Số liệu sẽ được nạp lại vào form nhập liệu và nút bấm chuyển thành **"Cập nhật"** để bạn lưu lại thay đổi mà không tạo mẫu trùng lặp.
+  - **Xóa từng mẫu số liệu**: Nhấn nút **Xóa** (icon thùng rác 🗑️) ở cột Thao tác của dòng đó để xóa riêng bài toán khỏi SQLite sau khi xác nhận.
+  - **Xóa đồng thời nhiều mẫu số liệu (hoặc tất cả)**:
+    + Tích chọn ô vuông checkbox ở đầu mỗi dòng mẫu số liệu muốn xóa.
+    + Hoặc tích ô checkbox trên thanh tiêu đề bảng để **chọn tất cả** các mẫu trong danh sách hiện tại.
+    + Khi có ít nhất 1 mẫu được chọn, **Thanh thao tác hàng loạt** màu xanh tím sẽ hiện lên ở trên bảng, hiển thị rõ số lượng mẫu đã chọn (ví dụ: *"3 mẫu đã chọn"*), kèm nút **"Bỏ chọn tất cả"** và nút **"Xóa {n} mẫu đã chọn"** (màu đỏ).
+    + Nhấn **"Xóa {n} mẫu đã chọn"** và xác nhận trên hộp thoại để xóa đồng thời toàn bộ các mẫu đã chọn khỏi cơ sở dữ liệu SQLite trong một thao tác duy nhất.
+- Để làm sạch toàn bộ cơ sở dữ liệu: Vào **Cài đặt** (icon bánh răng trên Sidebar) → **"Làm sạch cơ sở dữ liệu"**.
 
 ---
 

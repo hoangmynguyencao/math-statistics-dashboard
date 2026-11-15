@@ -234,7 +234,7 @@ wheels = [
 [[package]]
 name = "math-statistics-dashboard"
 version = "1.0.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "fastapi", version = "0.162.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "fastapi", version = "0.163.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -251,9 +251,6 @@ requires-dist = [
     { name = "python-multipart", specifier = ">=0.0.6" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.24.0" },
 ]
-
-[package.metadata.requires-dev]
-dev = []
 
 [[package]]
 name = "opentelemetry-api"

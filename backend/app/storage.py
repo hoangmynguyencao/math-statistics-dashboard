@@ -275,6 +275,18 @@ def delete_dataset_item(dataset_id: str) -> bool:
         conn.commit()
         return cursor.rowcount > 0
 
+def delete_multiple_datasets(dataset_ids: List[str]) -> int:
+    """Xóa nhiều mẫu số liệu cùng lúc khỏi cơ sở dữ liệu SQLite."""
+    if not dataset_ids:
+        return 0
+    init_db()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        placeholders = ",".join("?" for _ in dataset_ids)
+        cursor.execute(f"DELETE FROM datasets WHERE id IN ({placeholders})", dataset_ids)
+        conn.commit()
+        return cursor.rowcount
+
 def reset_to_demo_data():
     """Làm sạch toàn bộ dữ liệu trong cơ sở dữ liệu SQLite."""
     init_db()

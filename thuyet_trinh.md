@@ -181,7 +181,8 @@ GET    /api/datasets            → Lấy danh sách tất cả mẫu số liệ
 POST   /api/datasets            → Tạo mới mẫu số liệu (HTTP 201 Created)
 GET    /api/datasets/{id}       → Lấy chi tiết 1 mẫu theo ID
 PUT    /api/datasets/{id}       → Cập nhật mẫu số liệu
-DELETE /api/datasets/{id}       → Xóa mẫu số liệu
+DELETE /api/datasets/{id}       → Xóa từng mẫu số liệu theo ID
+POST   /api/datasets/batch-delete → Xóa đồng thời nhiều mẫu số liệu (Batch Delete)
 POST   /api/stats/calculate     → Tính thống kê tức thì (không lưu DB)
 POST   /api/datasets/reset      → Xóa toàn bộ dữ liệu
 ```
@@ -617,26 +618,45 @@ Freq │
 
 ---
 
-## Bước 5 — Quản lý Dataset (Tab "Tổng quan")
+## Bước 5 — Quản lý Dataset theo danh sách (Tab "Tổng quan")
 
-### DataTable Component — CRUD Interface
+### DataTable Component — CRUD Interface & Batch Operations
 
 ```
-┌────┬──────────────────────────┬────────┬───────────┬──────────┐
-│ #  │ Tên bài toán             │ n      │   x̄       │ Actions  │
-├────┼──────────────────────────┼────────┼───────────┼──────────┤
-│ 1  │ Điểm Toán lớp 10A1      │  12    │  7.75     │ ✏️ 🗑️   │
-│ 2  │ Chiều cao học sinh       │  30    │  165.3    │ ✏️ 🗑️   │
-│ 3  │ Số con trong gia đình    │  40    │  1.675    │ ✏️ 🗑️   │
-└────┴──────────────────────────┴────────┴───────────┴──────────┘
-
-Filter: [🔍 Tìm kiếm...] [Lọc theo chế độ ▾] [Sắp xếp theo ▾]
+┌────────────────────────────────────────────────────────────────────────┐
+│ Filter: [🔍 Tìm kiếm...] [Lọc theo chế độ ▾] [Sắp xếp theo ▾]         │
+├────────────────────────────────────────────────────────────────────────┤
+│ [✓] 2 mẫu đã chọn        [Bỏ chọn tất cả]   [🗑️ Xóa 2 mẫu đã chọn]    │  ← Bulk Action Bar
+├───────┬──────────────────────────┬────────┬───────────┬────────┬───────┤
+│ [ ]   │ Tên bài toán             │ n      │   x̄       │ Ngoại lệ│Actions│
+├───────┼──────────────────────────┼────────┼───────────┼────────┼───────┤
+│ [x] 1 │ Điểm Toán lớp 10A1      │  12    │  7.75     │ 2 điểm │👁️✏️🗑️│
+│ [x] 2 │ Chiều cao học sinh       │  30    │  165.3    │ —      │👁️✏️🗑️│
+│ [ ] 3 │ Số con trong gia đình    │  40    │  1.675    │ —      │👁️✏️🗑️│
+└───────┴──────────────────────────┴────────┴───────────┴────────┴───────┘
 ```
 
-**Thao tác:**
-- Nhấp vào dòng → `GET /api/datasets/{id}` → load vào `activeDataset` state
-- **✏️ Sửa** → Pre-fill form → `PUT /api/datasets/{id}` khi lưu
-- **🗑️ Xóa** → Confirm dialog → `DELETE /api/datasets/{id}`
+**Các thao tác quản lý dữ liệu linh hoạt:**
+
+1. **Xem chi tiết mẫu số liệu (👁️ hoặc nhấp vào dòng):**
+   - Kích hoạt `GET /api/datasets/{id}` hoặc cập nhật `activeDataset` state.
+   - Bảng điều khiển lập tức tải số liệu và cập nhật 4 thẻ KPI cùng các thông số tóm tắt.
+
+2. **Chỉnh sửa từng mẫu số liệu (✏️):**
+   - Nhấn nút cây bút ở dòng tương ứng.
+   - Dữ liệu của bài toán được đưa ngược về form `DataEntryForm` ở tab "Nhập liệu".
+   - Nút lưu tự động chuyển thành **"Cập nhật"** (thực hiện request `PUT /api/datasets/{id}`), đảm bảo sửa đúng mẫu và không tạo dữ liệu trùng lặp.
+
+3. **Xóa từng mẫu số liệu (🗑️):**
+   - Nhấn nút thùng rác ở cột Thao tác của dòng đó.
+   - Hộp thoại xác nhận xuất hiện: *"Bạn có chắc muốn xóa mẫu... khỏi cơ sở dữ liệu?"*.
+   - Gửi request `DELETE /api/datasets/{id}` để xóa ngay khỏi cơ sở dữ liệu SQLite.
+
+4. **Xóa đồng thời nhiều mẫu số liệu (Batch Delete):**
+   - **Tích chọn từng dòng**: Click vào checkbox ở đầu mỗi hàng để chọn các mẫu cần xử lý.
+   - **Chọn tất cả**: Click checkbox trên tiêu đề bảng để chọn hoặc bỏ chọn toàn bộ danh sách đang hiển thị.
+   - **Thanh thao tác hàng loạt (Bulk Action Bar)**: Tự động xuất hiện ngay trên bảng khi có từ 1 mẫu trở lên được chọn, hiển thị rõ số lượng mẫu đã chọn (ví dụ: *"2 mẫu đã chọn"*), nút **"Bỏ chọn tất cả"** và nút **"Xóa {n} mẫu đã chọn"** (màu đỏ).
+   - Nhấn **"Xóa {n} mẫu đã chọn"** → Hộp thoại xác nhận → Hệ thống gửi request `POST /api/datasets/batch-delete` (hoặc xử lý song song các lệnh DELETE) để xóa đồng thời toàn bộ các mẫu được chọn chỉ với một thao tác duy nhất.
 
 ### Dataset Selector trong trang Báo cáo
 
@@ -654,8 +674,12 @@ Filter: [🔍 Tìm kiếm...] [Lọc theo chế độ ▾] [Sắp xếp theo ▾
 | **"Cập nhật"** | `PUT /api/datasets/{id}` | Cập nhật dataset hiện tại |
 | **"Xem báo cáo →"** | — | Client-side route change |
 | **"Nhập mẫu tiếp theo"** | — | Reset form state |
-| **✏️** (Sửa) | — | Load dataset vào form |
-| **🗑️** (Xóa) | `DELETE /api/datasets/{id}` | Xóa khỏi SQLite |
+| **👁️** (Xem) | — | Tải dataset lên bảng điều khiển |
+| **✏️** (Sửa) | — | Load dataset vào form để chỉnh sửa |
+| **🗑️** (Xóa đơn) | `DELETE /api/datasets/{id}` | Xóa từng mẫu khỏi SQLite |
+| **Checkbox [ ]** | — | Chọn mẫu số liệu để thao tác hàng loạt |
+| **"Xóa {n} mẫu đã chọn"** | `POST /api/datasets/batch-delete` | Xóa đồng thời nhiều mẫu đã chọn |
+| **"Bỏ chọn tất cả"** | — | Hủy toàn bộ lựa chọn checkbox |
 | **⚙️** (Cài đặt) | `POST /api/datasets/reset` | Xóa toàn bộ DB |
 | **🌙 / ☀️** | — | Toggle dark mode (localStorage) |
 
