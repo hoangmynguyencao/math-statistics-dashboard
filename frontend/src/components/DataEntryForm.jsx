@@ -70,7 +70,7 @@ export default function DataEntryForm({
     if (onNewDataset) onNewDataset();
   };
 
-  // Nhập dữ liệu từ file Excel
+  // Nhập dữ liệu từ file Excel hỗ trợ cả dạng Cột dọc lẫn Hàng ngang
   const handleExcelImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -83,30 +83,148 @@ export default function DataEntryForm({
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-        if (rows.length <= 1) {
-          throw new Error('File Excel không có dữ liệu (chỉ có tiêu đề hoặc rỗng)');
+        if (!rows || rows.length === 0) {
+          throw new Error('File Excel rỗng, vui lòng kiểm tra lại');
         }
 
         if (mode === 'simple') {
-          // Cột A = số liệu, hàng 1 = tiêu đề (bỏ qua), hàng 2+ = dữ liệu
-          const numbers = rows.slice(1)
-            .map(r => r[0])
-            .filter(v => v !== '' && v !== null && v !== undefined)
-            .map(v => String(v).replace(',', '.'));
-          if (numbers.length === 0) {
-            throw new Error('Không tìm thấy dữ liệu số trong cột A (từ hàng 2 trở đi)');
+          // ==========================================
+          // CHẾ ĐỘ DÃY SỐ LIỆU: Hỗ trợ cả Cột dọc & Hàng ngang
+          // ==========================================
+
+          // 1. Quét tìm hàng có nhiều số nhất (Dạng hàng ngang)
+          let bestHorizontal = [];
+          for (const row of rows) {
+            const nums = [];
+            for (const cell of (row || [])) {
+              if (cell === '' || cell === null || cell === undefined) continue;
+              const clean = String(cell).trim().replace(',', '.');
+              const n = parseFloat(clean);
+              if (!isNaN(n)) nums.push(clean);
+            }
+            if (nums.length > bestHorizontal.length) {
+              bestHorizontal = nums;
+            }
           }
-          setRawData(numbers.join('; '));
+
+          // 2. Quét tìm cột có nhiều số nhất (Dạng cột dọc)
+          let totalCols = 0;
+          for (const row of rows) {
+            if ((row || []).length > totalCols) totalCols = row.length;
+          }
+          let bestVertical = [];
+          for (let c = 0; c < totalCols; c++) {
+            const nums = [];
+            for (const row of rows) {
+              const cell = row?.[c];
+              if (cell === '' || cell === null || cell === undefined) continue;
+              const clean = String(cell).trim().replace(',', '.');
+              const n = parseFloat(clean);
+              if (!isNaN(n)) nums.push(clean);
+            }
+            if (nums.length > bestVertical.length) {
+              bestVertical = nums;
+            }
+          }
+
+          // 3. Gom tất cả số trong toàn bộ sheet (hỗ trợ bảng lưới nhiều hàng nhiều cột)
+          const allNums = [];
+          for (const row of rows) {
+            for (const cell of (row || [])) {
+              if (cell === '' || cell === null || cell === undefined) continue;
+              const clean = String(cell).trim().replace(',', '.');
+              const n = parseFloat(clean);
+              if (!isNaN(n)) allNums.push(clean);
+            }
+          }
+
+          if (allNums.length === 0) {
+            throw new Error('Không tìm thấy dữ liệu số nào trong file Excel');
+          }
+
+          // Nhận diện theo dạng tối ưu nhất
+          if (bestVertical.length >= 2 && bestVertical.length === allNums.length) {
+            setRawData(bestVertical.join('; '));
+          } else if (bestHorizontal.length >= 2 && bestHorizontal.length === allNums.length) {
+            setRawData(bestHorizontal.join('; '));
+          } else if (bestVertical.length >= allNums.length * 0.8 && bestVertical.length >= 2) {
+            setRawData(bestVertical.join('; '));
+          } else if (bestHorizontal.length >= allNums.length * 0.8 && bestHorizontal.length >= 2) {
+            setRawData(bestHorizontal.join('; '));
+          } else {
+            setRawData(allNums.join('; '));
+          }
         } else {
-          // Cột A = giá trị, Cột B = tần số; hàng 1 = tiêu đề (bỏ qua)
-          const lines = rows.slice(1)
-            .filter(r => r[0] !== '' && r[0] !== null && r[0] !== undefined
-                      && r[1] !== '' && r[1] !== null && r[1] !== undefined)
-            .map(r => `${String(r[0]).replace(',', '.')}: ${r[1]}`);
-          if (lines.length === 0) {
-            throw new Error('Không tìm thấy dữ liệu hợp lệ trong cột A và B (từ hàng 2 trở đi)');
+          // ==========================================
+          // CHẾ ĐỘ BẢNG TẦN SỐ: Hỗ trợ cả Cột dọc & Hàng ngang
+          // ==========================================
+
+          // 1. Thử nhận diện theo HÀNG NGANG (Row 1: Giá trị, Row 2: Tần số)
+          let bestHorizontalPairs = [];
+          for (let r = 0; r < rows.length - 1; r++) {
+            const rowVal = rows[r] || [];
+            const rowFreq = rows[r + 1] || [];
+            const maxCols = Math.max(rowVal.length, rowFreq.length);
+            const pairs = [];
+
+            for (let c = 0; c < maxCols; c++) {
+              const v1 = rowVal[c];
+              const v2 = rowFreq[c];
+              if (v1 === '' || v1 === null || v1 === undefined || v2 === '' || v2 === null || v2 === undefined) continue;
+              const cleanVal = String(v1).trim().replace(',', '.');
+              const cleanFreq = String(v2).trim().replace(',', '.');
+              const numVal = parseFloat(cleanVal);
+              const numFreq = parseFloat(cleanFreq);
+
+              // Tần số n_i phải là số nguyên dương >= 1
+              if (!isNaN(numVal) && !isNaN(numFreq) && numFreq >= 1 && Number.isInteger(numFreq)) {
+                pairs.push(`${cleanVal}: ${numFreq}`);
+              }
+            }
+
+            if (pairs.length > bestHorizontalPairs.length) {
+              bestHorizontalPairs = pairs;
+            }
           }
-          setRawData(lines.join('\n'));
+
+          // 2. Thử nhận diện theo CỘT DỌC (Col A: Giá trị, Col B: Tần số)
+          let totalCols = 0;
+          for (const row of rows) {
+            if ((row || []).length > totalCols) totalCols = row.length;
+          }
+
+          let bestVerticalPairs = [];
+          for (let c = 0; c < totalCols - 1; c++) {
+            const pairs = [];
+            for (let r = 0; r < rows.length; r++) {
+              const v1 = rows[r]?.[c];
+              const v2 = rows[r]?.[c + 1];
+              if (v1 === '' || v1 === null || v1 === undefined || v2 === '' || v2 === null || v2 === undefined) continue;
+              const cleanVal = String(v1).trim().replace(',', '.');
+              const cleanFreq = String(v2).trim().replace(',', '.');
+              const numVal = parseFloat(cleanVal);
+              const numFreq = parseFloat(cleanFreq);
+
+              if (!isNaN(numVal) && !isNaN(numFreq) && numFreq >= 1 && Number.isInteger(numFreq)) {
+                pairs.push(`${cleanVal}: ${numFreq}`);
+              }
+            }
+
+            if (pairs.length > bestVerticalPairs.length) {
+              bestVerticalPairs = pairs;
+            }
+          }
+
+          // So sánh và chọn dạng trích xuất được nhiều cặp hợp lệ hơn
+          if (bestHorizontalPairs.length >= 2 && bestHorizontalPairs.length >= bestVerticalPairs.length) {
+            setRawData(bestHorizontalPairs.join('\n'));
+          } else if (bestVerticalPairs.length >= 1) {
+            setRawData(bestVerticalPairs.join('\n'));
+          } else if (bestHorizontalPairs.length >= 1) {
+            setRawData(bestHorizontalPairs.join('\n'));
+          } else {
+            throw new Error('Không tìm thấy dữ liệu hợp lệ trong file Excel. Vui lòng đảm bảo bảng có cặp (Giá trị và Tần số nguyên dương) theo hàng ngang hoặc cột dọc.');
+          }
         }
       } catch (err) {
         setExcelError('Lỗi đọc file Excel: ' + err.message);
@@ -297,55 +415,114 @@ export default function DataEntryForm({
 
           {/* Guide panel */}
           {showExcelGuide && (
-            <div className="text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/60 rounded-lg p-3.5 space-y-3 leading-relaxed">
+            <div className="text-xs text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/60 rounded-lg p-3.5 space-y-4 leading-relaxed">
               {mode === 'simple' ? (
                 <>
-                  <p className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                    <FileSpreadsheet className="w-3.5 h-3.5" />
-                    Yêu cầu định dạng (Chế độ: Dãy số liệu)
+                  <div className="flex items-center justify-between border-b border-emerald-100 dark:border-emerald-900/60 pb-2">
+                    <p className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      Yêu cầu file Excel (Chế độ: Dãy số liệu) — Hỗ trợ cả Dọc và Ngang
+                    </p>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      Tự động nhận diện
+                    </span>
+                  </div>
+
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Bạn có thể sắp xếp các số theo <strong>Cột dọc</strong> (mỗi số một hàng) hoặc <strong>Hàng ngang</strong> (nhiều số trên cùng một hàng hoặc cả bảng lưới số):
                   </p>
-                  <ul className="space-y-1 text-slate-600 dark:text-slate-400 list-disc list-inside">
-                    <li><strong>Cột A</strong>: Chứa các giá trị số liệu (một số trên mỗi hàng)</li>
-                    <li><strong>Hàng 1</strong>: Tiêu đề cột (ví dụ: <em>"Giá trị"</em>) — sẽ được bỏ qua tự động</li>
-                    <li><strong>Hàng 2 trở đi</strong>: Các giá trị số liệu thực tế</li>
-                    <li>Chỉ đọc <strong>Sheet đầu tiên</strong> của file; dấu phẩy trong số thập phân sẽ tự đổi thành dấu chấm</li>
-                  </ul>
-                  <div className="font-mono text-[11px] bg-slate-50 dark:bg-slate-800 rounded p-2 border border-slate-200 dark:border-slate-700">
-                    <div className="grid grid-cols-2 gap-1 max-w-[200px]">
-                      <span className="font-bold text-indigo-600 dark:text-indigo-400 col-span-1 border-b border-slate-300 dark:border-slate-600 pb-1">A (Giá trị)</span>
-                      <span className="text-slate-400 col-span-1 border-b border-slate-300 dark:border-slate-600 pb-1 text-[10px]">(cột khác: bỏ qua)</span>
-                      {['7.5','8.0','6.5','9.0','8.5'].map(v => (
-                        <React.Fragment key={v}>
-                          <span className="text-slate-800 dark:text-slate-200">{v}</span>
-                          <span></span>
-                        </React.Fragment>
-                      ))}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {/* Cách 1: Cột dọc */}
+                    <div className="space-y-1.5 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <span className="font-bold text-[11px] text-indigo-600 dark:text-indigo-400 block">
+                        Định dạng 1: Theo Cột dọc
+                      </span>
+                      <p className="text-[10px] text-slate-500">Cột A chứa các số liệu (hàng đầu là tiêu đề, tự động bỏ qua):</p>
+                      <div className="font-mono text-[11px] bg-white dark:bg-slate-900 rounded p-2 border border-slate-200 dark:border-slate-700/80">
+                        <div className="font-bold text-slate-500 border-b pb-1 mb-1">A (Điểm)</div>
+                        <div>7.5</div>
+                        <div>8.0</div>
+                        <div>6.5</div>
+                        <div>9.0</div>
+                      </div>
+                    </div>
+
+                    {/* Cách 2: Hàng ngang */}
+                    <div className="space-y-1.5 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <span className="font-bold text-[11px] text-emerald-600 dark:text-emerald-400 block">
+                        Định dạng 2: Theo Hàng ngang
+                      </span>
+                      <p className="text-[10px] text-slate-500">Các số nằm ngang trên cùng một hàng (hoặc bảng lưới ma trận):</p>
+                      <div className="font-mono text-[11px] bg-white dark:bg-slate-900 rounded p-2 border border-slate-200 dark:border-slate-700/80 overflow-x-auto">
+                        <div className="grid grid-cols-4 gap-1 text-center font-bold text-slate-500 border-b pb-1 mb-1">
+                          <span>A</span><span>B</span><span>C</span><span>D</span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-1 text-center">
+                          <span>7.5</span><span>8.0</span><span>6.5</span><span>9.0</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </>
               ) : (
                 <>
-                  <p className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                    <FileSpreadsheet className="w-3.5 h-3.5" />
-                    Yêu cầu định dạng (Chế độ: Bảng tần số)
+                  <div className="flex items-center justify-between border-b border-emerald-100 dark:border-emerald-900/60 pb-2">
+                    <p className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                      <FileSpreadsheet className="w-3.5 h-3.5" />
+                      Yêu cầu file Excel (Chế độ: Bảng tần số) — Hỗ trợ cả Dọc và Ngang
+                    </p>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      Tự động nhận diện
+                    </span>
+                  </div>
+
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Hệ thống tự động nhận diện cả bảng lập theo <strong>Cột dọc</strong> lẫn bảng lập theo <strong>Hàng ngang</strong> (chuẩn như bảng trong SGK Toán 10):
                   </p>
-                  <ul className="space-y-1 text-slate-600 dark:text-slate-400 list-disc list-inside">
-                    <li><strong>Cột A</strong>: Giá trị (x&#7522;) — số nguyên hoặc số thập phân</li>
-                    <li><strong>Cột B</strong>: Tần số (n&#7522;) — phải là số nguyên dương</li>
-                    <li><strong>Hàng 1</strong>: Tiêu đề cột (ví dụ: <em>"Giá trị", "Tần số"</em>) — bỏ qua tự động</li>
-                    <li><strong>Hàng 2 trở đi</strong>: Từng cặp (giá trị, tần số) tương ứng</li>
-                    <li>Chỉ đọc <strong>Sheet đầu tiên</strong>; các cột khác (C, D, …) bỏ qua</li>
-                  </ul>
-                  <div className="font-mono text-[11px] bg-slate-50 dark:bg-slate-800 rounded p-2 border border-slate-200 dark:border-slate-700">
-                    <div className="grid grid-cols-2 gap-x-4 max-w-[220px]">
-                      <span className="font-bold text-indigo-600 dark:text-indigo-400 border-b border-slate-300 dark:border-slate-600 pb-1">A (Giá trị)</span>
-                      <span className="font-bold text-violet-600 dark:text-violet-400 border-b border-slate-300 dark:border-slate-600 pb-1">B (Tần số)</span>
-                      {[['0','4'],['1','12'],['2','18'],['3','5'],['4','1']].map(([v,f]) => (
-                        <React.Fragment key={v}>
-                          <span className="text-slate-800 dark:text-slate-200">{v}</span>
-                          <span className="text-slate-800 dark:text-slate-200">{f}</span>
-                        </React.Fragment>
-                      ))}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {/* Cách 1: Cột dọc */}
+                    <div className="space-y-1.5 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <span className="font-bold text-[11px] text-indigo-600 dark:text-indigo-400 block">
+                        Định dạng 1: Theo Cột dọc
+                      </span>
+                      <p className="text-[10px] text-slate-500">Cột A là Giá trị (xᵢ), Cột B là Tần số (nᵢ):</p>
+                      <div className="font-mono text-[11px] bg-white dark:bg-slate-900 rounded p-2 border border-slate-200 dark:border-slate-700/80">
+                        <div className="grid grid-cols-2 gap-2 font-bold border-b pb-1 mb-1 text-slate-500">
+                          <span>A (Giá trị)</span>
+                          <span>B (Tần số)</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2"><span>0</span><span>4</span></div>
+                        <div className="grid grid-cols-2 gap-2"><span>1</span><span>12</span></div>
+                        <div className="grid grid-cols-2 gap-2"><span>2</span><span>18</span></div>
+                      </div>
+                    </div>
+
+                    {/* Cách 2: Hàng ngang (Chuẩn SGK Toán 10) */}
+                    <div className="space-y-1.5 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <span className="font-bold text-[11px] text-violet-600 dark:text-violet-400 block">
+                        Định dạng 2: Theo Hàng ngang (Chuẩn SGK)
+                      </span>
+                      <p className="text-[10px] text-slate-500">Hàng 1 là Giá trị (xᵢ), Hàng 2 là Tần số (nᵢ):</p>
+                      <div className="font-mono text-[11px] bg-white dark:bg-slate-900 rounded p-2 border border-slate-200 dark:border-slate-700/80 overflow-x-auto">
+                        <div className="space-y-1">
+                          <div className="flex gap-2 items-center border-b pb-1">
+                            <span className="font-bold text-slate-500 shrink-0 w-16">Giá trị (x):</span>
+                            <span className="w-6 text-center">0</span>
+                            <span className="w-6 text-center">1</span>
+                            <span className="w-6 text-center">2</span>
+                            <span className="w-6 text-center">3</span>
+                          </div>
+                          <div className="flex gap-2 items-center">
+                            <span className="font-bold text-slate-500 shrink-0 w-16">Tần số (n):</span>
+                            <span className="w-6 text-center font-bold text-violet-600 dark:text-violet-400">4</span>
+                            <span className="w-6 text-center font-bold text-violet-600 dark:text-violet-400">12</span>
+                            <span className="w-6 text-center font-bold text-violet-600 dark:text-violet-400">18</span>
+                            <span className="w-6 text-center font-bold text-violet-600 dark:text-violet-400">5</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </>

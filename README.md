@@ -25,11 +25,10 @@
    - [4.1. Bắt đầu từ Trang chủ](#41-bắt-đầu-từ-trang-chủ)
    - [4.2. Nhập dãy số liệu thủ công](#42-nhập-dãy-số-liệu-thủ-công)
    - [4.3. Nhập bảng phân bố tần số](#43-nhập-bảng-phân-bố-tần-số)
-   - [4.4. Nhập số liệu tự động từ file Excel](#44-nhập-số-liệu-tự-động-từ-file-excel)
+   - [4.4. Nhập số liệu tự động từ file Excel (Cột dọc & Hàng ngang)](#44-nhập-số-liệu-tự-động-từ-file-excel-hỗ-trợ-cả-cột-dọc--hàng-ngang)
    - [4.5. Lưu trữ và quản lý nhiều mẫu số liệu](#45-lưu-trữ-và-quản-lý-nhiều-mẫu-số-liệu)
    - [4.6. Xem báo cáo thống kê & Lời giải công thức KaTeX](#46-xem-báo-cáo-thống-kê--lời-giải-công-thức-katex)
    - [4.7. Đọc hiểu Biểu đồ hộp (Box Plot) & Phát hiện giá trị ngoại lệ](#47-đọc-hiểu-biểu-đồ-hộp-box-plot--phát-hiện-giá-trị-ngoại-lệ)
-   - [4.8. Xuất dữ liệu ra file CSV](#48-xuất-dữ-liệu-ra-file-csv)
 5. [Chuẩn kiến thức Toán 10 áp dụng](#5-chuẩn-kiến-thức-toán-10-áp-dụng)
 6. [Giấy phép & Tác quyền](#6-giấy-phép--tác-quyền)
 
@@ -271,15 +270,14 @@ Trong quá trình thử nghiệm thực tế và phát triển dự án, nhiều
   - Xóa toàn bộ danh sách `DEMO_DATASETS` trong backend `storage.py`, làm sạch file `datasets.csv` về dạng chỉ có dòng tiêu đề.
   - Xóa danh sách `DEMO_DATA_PRESETS` và modal chọn ví dụ SGK trong frontend.
 
-### Tính năng mới 4: Nhập dữ liệu tự động từ file Excel (`.xlsx` / `.xls`)
-- **Yêu cầu**: Học sinh và giáo viên thường lưu số liệu thống kê trong bảng tính Excel, cần tính năng nạp thẳng file Excel vào phần mềm kèm chú thích yêu cầu định dạng rõ ràng.
+### Tính năng mới 4: Nhập dữ liệu tự động từ file Excel (`.xlsx` / `.xls`) đa định dạng (Cột dọc & Hàng ngang)
+- **Yêu cầu**: Học sinh và giáo viên thường lưu số liệu thống kê trong bảng tính Excel với nhiều cách bố trí khác nhau (xếp theo cột dọc hoặc kẻ bảng theo hàng ngang như trong SGK Toán 10). Hệ thống cần nhận diện và đọc thông minh cả hai định dạng này.
 - **Thực hiện**:
-  - Cài đặt thư viện `xlsx` (SheetJS) cho frontend.
-  - Bổ sung nút **"Nhập từ Excel (.xlsx / .xls)"** trong `DataEntryForm.jsx`.
-  - Tự động nhận diện dữ liệu Sheet đầu tiên:
-    - *Chế độ Dãy số liệu*: Đọc Cột A từ hàng 2 trở đi (hàng 1 là tiêu đề).
-    - *Chế độ Bảng tần số*: Đọc Cột A (Giá trị) và Cột B (Tần số) từ hàng 2 trở đi.
-  - Bổ sung panel bấm xem **"Yêu cầu định dạng file Excel"** kèm bảng minh họa mẫu trực quan.
+  - Tích hợp thư viện `xlsx` (SheetJS) cho frontend.
+  - Xây dựng thuật toán tự động nhận diện cấu trúc ma trận của sheet:
+    - *Chế độ Dãy số liệu*: Tự động đọc dữ liệu dù xếp theo 1 cột dọc (A), theo 1 hàng ngang, hoặc cả lưới ma trận nhiều hàng nhiều cột.
+    - *Chế độ Bảng tần số*: Tự động nhận diện cả dạng **Cột dọc** (Cột A: Giá trị $x_i$, Cột B: Tần số $n_i$) lẫn dạng **Hàng ngang** chuẩn SGK Toán 10 (Hàng trên: Giá trị $x_i$, Hàng dưới: Tần số $n_i$).
+  - Bổ sung panel bấm xem **"Yêu cầu định dạng file Excel"** kèm hình ảnh minh họa mẫu trực quan cho cả 2 kiểu xếp dữ liệu.
 
 ### Lỗi 5: Sửa lỗi đổi tên bài toán / mẫu số liệu
 - **Hiện tượng**: Người dùng nhập tên mới cho bài toán trong form nhưng sau khi lưu thì tên không được cập nhật lại hoặc bị ghi đè thành tên cũ.
@@ -348,12 +346,16 @@ Trong quá trình thử nghiệm thực tế và phát triển dự án, nhiều
 
 ---
 
-### 4.4. Nhập số liệu tự động từ file Excel
+### 4.4. Nhập số liệu tự động từ file Excel (Hỗ trợ cả Cột dọc & Hàng ngang)
 1. Nhấn nút **"Nhập từ Excel (.xlsx / .xls)"** trên form nhập liệu.
 2. Chọn file Excel từ máy tính của bạn:
-   - **Với Dãy số liệu**: Cột A chứa các số liệu (1 số trên 1 dòng), hàng 1 là tiêu đề (hệ thống tự động bỏ qua).
-   - **Với Bảng tần số**: Cột A là Giá trị ($x_i$), Cột B là Tần số ($n_i$), hàng 1 là tiêu đề.
-3. Dữ liệu từ Excel sẽ được đọc và điền tự động vào ô nhập liệu ngay lập tức.
+   - **Chế độ Dãy số liệu**:
+     + *Dạng cột dọc*: Cột A chứa danh sách các số từ trên xuống dưới (hàng 1 tiêu đề tự động bỏ qua).
+     + *Dạng hàng ngang*: Một hàng chứa các số qua các cột, hoặc cả bảng lưới số.
+   - **Chế độ Bảng tần số**:
+     + *Dạng cột dọc*: Cột A là Giá trị ($x_i$), Cột B là Tần số ($n_i$).
+     + *Dạng hàng ngang (Chuẩn SGK Toán 10)*: Hàng trên là Giá trị ($x_i$), Hàng dưới là Tần số ($n_i$).
+3. Hệ thống sẽ tự động nhận diện cấu trúc file và điền dữ liệu vào form lập tức.
 
 ---
 
@@ -382,12 +384,6 @@ Trong quá trình thử nghiệm thực tế và phát triển dự án, nhiều
 - **Vạch kẻ giữa hộp**: Thể hiện giá trị Trung vị $M_e = Q_2$.
 - **Hai râu (Whiskers)**: Nối từ thân hộp tới giá trị nhỏ nhất và lớn nhất trong ngưỡng an toàn.
 - **Điểm tròn màu đỏ**: Là các **giá trị ngoại lệ** bất thường thỏa mãn $x < Q_1 - 1{,}5\Delta_Q$ hoặc $x > Q_3 + 1{,}5\Delta_Q$. Rê chuột vào điểm để xem giá trị chính xác.
-
----
-
-### 4.8. Xuất dữ liệu ra file CSV
-- Nhấn nút **"Xuất CSV"** ở góc trên bên phải thanh Header (hoặc nút *"Xuất CSV"* trên bảng dữ liệu).
-- Trình duyệt sẽ tải xuống file `bang_thong_ke_toan10.csv` chứa toàn bộ các bài toán và kết quả tính toán chi tiết, có thể mở trực tiếp bằng Microsoft Excel hoặc Google Sheets.
 
 ---
 
