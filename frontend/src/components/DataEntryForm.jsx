@@ -305,8 +305,8 @@ export default function DataEntryForm({
         </div>
       </div>
 
-      {/* Banner thông báo trạng thái chỉnh sửa hoặc thêm mới */}
-      {isEditing ? (
+      {/* Banner thông báo trạng thái chỉnh sửa */}
+      {isEditing && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 mb-5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-xs shadow-xs">
           <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-200 font-semibold">
             <span className="p-1 rounded-md bg-amber-200 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200">
@@ -327,13 +327,6 @@ export default function DataEntryForm({
             <PlusCircle className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span>Hủy sửa • Nhập mẫu mới</span>
           </button>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Chế độ nhập mẫu mới (các mẫu đã lưu trước đó được giữ nguyên an toàn trong danh sách)
-          </span>
         </div>
       )}
 
