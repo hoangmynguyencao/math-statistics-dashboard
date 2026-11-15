@@ -1,11 +1,10 @@
 import React from 'react';
-import { Menu, Sun, Moon, Download, Home, FileText } from 'lucide-react';
+import { Menu, Sun, Moon, Home } from 'lucide-react';
 
 export default function Header({
   onOpenMobileSidebar,
   isDarkMode,
   toggleDarkMode,
-  onExportCsv,
   onGoHome,
   activeTab
 }) {
@@ -62,17 +61,6 @@ export default function Header({
           >
             <Home className="w-3.5 h-3.5 text-indigo-500" />
             <span className="hidden sm:inline">Trang chủ</span>
-          </button>
-
-          {/* Nút Xuất CSV */}
-          <button
-            type="button"
-            onClick={onExportCsv}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/70 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/80 cursor-pointer"
-            title="Xuất cơ sở dữ liệu CSV"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Xuất CSV</span>
           </button>
 
           {/* Toggle Dark / Light */}

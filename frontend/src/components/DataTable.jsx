@@ -5,11 +5,10 @@ import {
   Trash2, 
   Edit3, 
   ArrowUpDown, 
-  Download, 
   Eye, 
   AlertTriangle, 
-  Filter,
-  CheckCircle2
+  Filter, 
+  CheckCircle2 
 } from 'lucide-react';
 import MathFormula from './MathFormula';
 
@@ -18,8 +17,7 @@ export default function DataTable({
   onSelectDataset, 
   onDeleteDataset, 
   onEditDataset, 
-  activeDatasetId, 
-  onExportCsv 
+  activeDatasetId 
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMode, setFilterMode] = useState('all'); // all | simple | frequency | has_outliers
@@ -75,19 +73,6 @@ export default function DataTable({
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Lưu vĩnh viễn trong file CSV trên server, hỗ trợ tìm kiếm, lọc và phân tích lại bất cứ lúc nào
           </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Nút tải file CSV */}
-          <button
-            type="button"
-            onClick={onExportCsv}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
-            title="Tải toàn bộ dữ liệu về máy dạng file CSV"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Tải file CSV
-          </button>
         </div>
       </div>
 

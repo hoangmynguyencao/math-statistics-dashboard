@@ -66,8 +66,8 @@ export default function Homepage({
     },
     {
       icon: BookOpen,
-      title: 'Các Bước Giải Chi Tiết & Xuất CSV',
-      desc: 'Trình bày từng bước thế số theo công thức chuẩn KaTeX Toán học và hỗ trợ xuất lưu trữ toàn bộ dữ liệu ra file CSV/Excel.',
+      title: 'Các Bước Giải Chi Tiết & Trực Quan',
+      desc: 'Trình bày từng bước thế số theo công thức chuẩn KaTeX Toán học và minh họa dữ liệu rõ ràng, dễ hiểu theo đúng SGK Toán 10.',
       badge: 'Lời giải chi tiết'
     }
   ];
@@ -179,12 +179,6 @@ export default function Homepage({
                     <p className="text-xs text-slate-500">Hãy thêm file ảnh của bạn vào thư mục frontend/public/homepage-banner.png</p>
                   </div>
                 )}
-
-                {/* Badge thông tin góc dưới ảnh */}
-                <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-10 px-3 py-1.5 rounded-xl bg-slate-950/70 backdrop-blur-md border border-white/10 text-white text-[11px] sm:text-xs flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                  <span>Hình ảnh minh họa trang chủ (Bạn có thể tự thay đổi file ảnh)</span>
-                </div>
               </div>
             </div>
           </div>

@@ -222,44 +222,6 @@ export default function App() {
     setStatsPreview(null);
   };
 
-  // Tải file CSV từ server hoặc tự tạo file CSV trên client
-  const handleExportCsv = () => {
-    if (apiOnline && datasets.length > 0) {
-      window.open(`${API_BASE}/api/export/csv`, '_blank');
-      return;
-    }
-
-    // Tự sinh file CSV từ datasets hiện có
-    const headers = ["id", "name", "mode", "raw_data", "sample_size", "mean", "median", "q1", "q3", "iqr", "range_val", "variance", "std_dev", "notes", "created_at"];
-    const rows = datasets.map(d => [
-      d.id,
-      `"${(d.name || '').replace(/"/g, '""')}"`,
-      d.mode,
-      `"${(d.raw_data || '').replace(/"/g, '""')}"`,
-      d.stats?.sample_size || 0,
-      d.stats?.mean || 0,
-      d.stats?.median || 0,
-      d.stats?.q1 || 0,
-      d.stats?.q3 || 0,
-      d.stats?.iqr || 0,
-      d.stats?.range_val || 0,
-      d.stats?.variance || 0,
-      d.stats?.std_dev || 0,
-      `"${(d.notes || '').replace(/"/g, '""')}"`,
-      `"${d.created_at || ''}"`
-    ]);
-
-    const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'bang_thong_ke_toan10.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // NẾU ĐANG Ở TRANG CHỦ (HOMEPAGE)
   if (activeTab === 'home') {
     return (
@@ -295,7 +257,6 @@ export default function App() {
           onOpenMobileSidebar={() => setIsOpenMobile(true)}
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
-          onExportCsv={handleExportCsv}
           onGoHome={() => setActiveTab('home')}
           activeTab={activeTab}
         />
@@ -451,7 +412,6 @@ export default function App() {
                     onDeleteDataset={handleDeleteDataset}
                     onEditDataset={handleEditDataset}
                     activeDatasetId={activeDataset?.id}
-                    onExportCsv={handleExportCsv}
                   />
                 </>
               )}
