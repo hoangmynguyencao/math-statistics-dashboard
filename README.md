@@ -14,21 +14,7 @@
    - [Bước 5: Hướng dẫn đưa mã nguồn lên GitHub](#bước-5-hướng-dẫn-đưa-mã-nguồn-lên-github)
    - [Bước 6: Hướng dẫn Deploy miễn phí lên Render (onrender.com)](#bước-6-hướng-dẫn-deploy-miễn-phí-lên-render-onrendercom)
 3. [Lịch sử sửa lỗi và các cải tiến sau này](#3-lịch-sử-sửa-lỗi-và-các-cải-tiến-sau-này)
-   - [Lỗi 1: Cú pháp f-string trong Python 3.14](#lỗi-1-cú-pháp-f-string-trong-python-314)
-   - [Lỗi 2: Nhận diện Python trong script run_local.bat](#lỗi-2-nhận-diện-python-trong-script-run_localbat)
-   - [Cải tiến 3: Bổ sung Homepage & Bỏ các mẫu số liệu có sẵn](#cải-tiến-3-bổ-sung-homepage--bỏ-các-mẫu-số-liệu-có-sẵn)
-   - [Tính năng mới 4: Nhập dữ liệu tự động từ file Excel (.xlsx / .xls)](#tính-năng-mới-4-nhập-dữ-liệu-tự-động-từ-file-excel-xlsx--xls)
-   - [Lỗi 5: Sửa lỗi đổi tên bài toán / mẫu số liệu](#lỗi-5-sửa-lỗi-đổi-tên-bài-toán--mẫu-số-liệu)
-   - [Lỗi 6: Sửa lỗi chỉ lưu được 1 mẫu số liệu vào file CSV](#lỗi-6-sửa-lỗi-chỉ-lưu-được-1-mẫu-số-liệu-vào-file-csv)
-   - [Cải tiến 7: Tái cấu trúc chuẩn giao diện 3 phân vùng (Tổng quan, Nhập liệu, Báo cáo & Thống kê)](#cải-tiến-7-tái-cấu-trúc-chuẩn-giao-diện-3-phân-vùng-tổng-quan-nhập-liệu-báo-cáo--thống-kê)
 4. [Hướng dẫn sử dụng trang web chi tiết](#4-hướng-dẫn-sử-dụng-trang-web-chi-tiết)
-   - [4.1. Bắt đầu từ Trang chủ](#41-bắt-đầu-từ-trang-chủ)
-   - [4.2. Nhập dãy số liệu thủ công](#42-nhập-dãy-số-liệu-thủ-công)
-   - [4.3. Nhập bảng phân bố tần số](#43-nhập-bảng-phân-bố-tần-số)
-   - [4.4. Nhập số liệu tự động từ file Excel (Cột dọc & Hàng ngang)](#44-nhập-số-liệu-tự-động-từ-file-excel-hỗ-trợ-cả-cột-dọc--hàng-ngang)
-   - [4.5. Lưu trữ và quản lý nhiều mẫu số liệu](#45-lưu-trữ-và-quản-lý-nhiều-mẫu-số-liệu)
-   - [4.6. Xem báo cáo thống kê & Lời giải công thức KaTeX](#46-xem-báo-cáo-thống-kê--lời-giải-công-thức-katex)
-   - [4.7. Đọc hiểu Biểu đồ hộp (Box Plot) & Phát hiện giá trị ngoại lệ](#47-đọc-hiểu-biểu-đồ-hộp-box-plot--phát-hiện-giá-trị-ngoại-lệ)
 5. [Chuẩn kiến thức Toán 10 áp dụng](#5-chuẩn-kiến-thức-toán-10-áp-dụng)
 6. [Giấy phép & Tác quyền](#6-giấy-phép--tác-quyền)
 
@@ -41,18 +27,19 @@ Trang web được thiết kế theo phong cách **Clean Dashboard** hiện đ�
 - **Giao diện chuẩn Dashboard**: Sidebar điều hướng thanh lịch, hỗ trợ **Light Mode & Dark Mode** tức thời.
 - **Phân chia không gian làm việc chuyên biệt**:
   - **Trang chủ**: Giới thiệu tổng quan, hình ảnh minh họa, nút bắt đầu thống kê.
-  - **Tổng quan**: Chỉ hiển thị nội dung cơ bản của mẫu số liệu và danh sách quản lý các bài toán đã lưu.
-  - **Nhập liệu mới**: Chỉ hiển thị form nhập số liệu (thủ công hoặc Excel) và lưu file CSV.
-  - **Báo cáo & Thống kê**: Hiển thị chi tiết mẫu số liệu sau khi nhập cùng toàn bộ báo cáo phân tích, công thức và biểu đồ.
+  - **Tổng quan**: Hiển thị nội dung cơ bản của mẫu số liệu và danh sách quản lý các bài toán đã lưu.
+  - **Nhập liệu mới**: Chỉ hiển thị form nhập số liệu (thủ công hoặc Excel) và nút lưu mẫu.
+  - **Báo cáo & Thống kê**: Hiển thị chi tiết mẫu số liệu cùng toàn bộ báo cáo phân tích, công thức và biểu đồ.
 - **Biểu diễn công thức Toán học KaTeX**: Chuẩn LaTeX sắc nét, trình bày từng bước thế số và giải thích chi tiết theo đúng SGK Toán 10.
 - **Hỗ trợ nhập linh hoạt**:
   - Nhập dãy số tự do (ngăn cách bằng dấu phẩy, chấm phẩy, khoảng trắng).
   - Nhập bảng phân bố tần số (cặp giá trị $x_i$ : tần số $n_i$).
-  - Nhập trực tiếp từ file **Excel** (`.xlsx`, `.xls`).
+  - Nhập trực tiếp từ file **Excel** (`.xlsx`, `.xls`) — hỗ trợ cả dạng cột dọc lẫn hàng ngang.
 - **Trực quan hóa đồ thị**:
   - **Biểu đồ hộp (Box Plot)**: Tóm tắt 5 số đặc trưng ($Min, Q_1, Q_2, Q_3, Max$) và **làm nổi bật giá trị ngoại lệ** bằng chấm đỏ.
   - **Biểu đồ cột tần số (Frequency Bar Chart)**: Trực quan hóa phân bố tần số các phần tử.
-- **Lưu trữ CSV vĩnh viễn**: Dữ liệu lưu xuống file CSV, hỗ trợ lưu nhiều mẫu số liệu, chỉnh sửa, xóa và xuất tải về máy.
+- **Lưu trữ SQLite vĩnh viễn**: Dữ liệu lưu xuống cơ sở dữ liệu SQLite, hỗ trợ lưu nhiều mẫu số liệu, chỉnh sửa và xóa.
+- **Quản lý Python với uv**: Backend sử dụng `uv` — trình quản lý gói Python hiện đại, nhanh và nhẹ hơn pip.
 
 ---
 
@@ -95,9 +82,9 @@ Yêu cầu cụ thể như sau:
   + Các số đặc trưng đo độ phân tán: Khoảng biến thiên (R), Khoảng tứ phân vị (\Delta_Q), Phương sai (s^2), Độ lệch chuẩn (s).
   + Giá trị ngoại lệ: Hiển thị rõ điều kiện xác định giá trị ngoại lệ (x < Q_1 - 1,5\Delta_Q hoặc x > Q_3 + 1,5\Delta_Q), kèm danh sách các giá trị ngoại lệ tìm được nếu có.
 - Hiển thị 4 thẻ KPI nổi bật đầu trang: Cỡ mẫu (n), Số trung bình (\bar{x}), Trung vị (M_e), Khoảng tứ phân vị (\Delta_Q) (với các con số lớn, rõ ràng và icon minh họa).
-- Tích hợp biểu đồ trực quan (sử dụng thư viện nhẹ như Chart.js/Recharts hoặc SVG thuần): 
-Biểu đồ cột thể hiện phân bố tần số của mẫu số liệu.
-Biểu đồ hộp (Box Plot) để trực quan hóa giá trị nhỏ nhất, lớn nhất, các tứ phân vị (Q_1, Q_2, Q_3) và tự động đánh dấu / làm nổi bật các giá trị ngoại lệ (bất thường) ngay trên biểu đồ để học sinh dễ dàng nhận diện số liệu bất thường hoặc không chính xác trong mẫu.
+- Tích hợp biểu đồ trực quan (sử dụng thư viện nhẹ như Chart.js/Recharts hoặc SVG thuần):
+  Biểu đồ cột thể hiện phân bố tần số của mẫu số liệu.
+  Biểu đồ hộp (Box Plot) để trực quan hóa giá trị nhỏ nhất, lớn nhất, các tứ phân vị (Q_1, Q_2, Q_3) và tự động đánh dấu / làm nổi bật các giá trị ngoại lệ (bất thường) ngay trên biểu đồ để học sinh dễ dàng nhận diện số liệu bất thường hoặc không chính xác trong mẫu.
 - Một bảng dữ liệu (Data Table) ở dưới cùng lưu trữ các bộ mẫu số liệu đã nhập, có chức năng tìm kiếm, lọc, sắp xếp và nút xóa/sửa từng dòng.
 
 5. Trải nghiệm người dùng (UX) & Triển khai (Deployment):
@@ -114,8 +101,9 @@ Cuối cùng, hãy tạo thêm một file README.md hoàn chỉnh, trình bày r
 
 Hệ thống được tổ chức theo mô hình **Monorepo kết hợp**:
 - **Frontend**: Single Page Application với React 18, Vite, Tailwind CSS, Lucide React, XLSX và KaTeX.
-- **Backend**: FastAPI (Python), RESTful API, tự động nạp và ghi file CSV.
-- **Chế độ triển khai kép**: 
+- **Backend**: FastAPI (Python), RESTful API, lưu trữ dữ liệu bằng SQLite (tích hợp sẵn trong Python).
+- **Quản lý Python**: Dùng `uv` — trình quản lý môi trường & gói Python hiện đại (thay thế pip/venv).
+- **Chế độ triển khai kép**:
   - *Cục bộ (Local)*: Chạy song song React dev server (`:5173`) và FastAPI (`:8000`).
   - *Xuất bản (Production / Render)*: FastAPI tự động phục vụ các file tĩnh đã build của React từ `frontend/dist`. Toàn bộ ứng dụng chạy trên **1 Web Service duy nhất**, không gặp lỗi CORS và hoàn toàn miễn phí.
 
@@ -124,14 +112,13 @@ mathapp/
 ├── backend/
 │   ├── app/
 │   │   ├── __init__.py         # Package module
-│   │   ├── config.py           # Thiết lập đường dẫn CSV, PORT, CORS
+│   │   ├── config.py           # Thiết lập đường dẫn SQLite, PORT, CORS
 │   │   ├── models.py           # Pydantic schemas kiểm tra kiểu dữ liệu
 │   │   ├── stats.py            # Thuật toán toán học chuẩn SGK Toán 10 KNTT
-│   │   ├── storage.py          # Thao tác đọc/ghi/cập nhật/xóa file CSV
+│   │   ├── storage.py          # Thao tác đọc/ghi/cập nhật/xóa cơ sở dữ liệu SQLite
 │   │   └── main.py             # FastAPI App & phục vụ file tĩnh
-│   ├── data/
-│   │   └── datasets.csv        # Cơ sở dữ liệu CSV lưu trữ các mẫu số liệu
-│   └── requirements.txt        # Các gói thư viện Python backend
+│   └── data/
+│       └── database.sqlite     # Cơ sở dữ liệu SQLite lưu trữ các mẫu số liệu
 ├── frontend/
 │   ├── public/
 │   │   ├── homepage-banner.svg # Banner đồ họa toán học cho trang chủ
@@ -143,7 +130,7 @@ mathapp/
 │   │   │   ├── Header.jsx             # Thanh tiêu đề trên
 │   │   │   ├── KPICards.jsx           # 4 Thẻ chỉ số nổi bật
 │   │   │   ├── DataEntryForm.jsx      # Form nhập liệu (Thủ công & Excel)
-│   │   │   ├── DataTable.jsx          # Bảng quản lý dữ liệu CSV
+│   │   │   ├── DataTable.jsx          # Bảng quản lý dữ liệu
 │   │   │   ├── StatisticsSummary.jsx  # Công thức & lời giải KaTeX
 │   │   │   ├── BoxPlotChart.jsx       # Biểu đồ hộp & điểm ngoại lệ
 │   │   │   ├── FrequencyChart.jsx     # Biểu đồ cột tần số
@@ -157,8 +144,12 @@ mathapp/
 │   ├── package.json            # Cấu hình thư viện frontend (xlsx, lucide, katex)
 │   ├── tailwind.config.js      # Thiết lập theme, màu sắc, Dark mode
 │   └── vite.config.js          # Cấu hình Vite build & dev server
+├── pyproject.toml              # Cấu hình dự án Python (uv / PEP 517)
+├── uv.lock                     # Lock file phiên bản chính xác các gói Python
+├── requirements.txt            # Danh sách gói Python (dùng khi deploy Render)
 ├── build.sh                    # Script tự động build trên Render
-├── run_local.bat               # File chạy nhanh 1-click trên Windows
+├── render.yaml                 # Cấu hình triển khai Render
+├── run_local.bat               # File chạy nhanh 1-click trên Windows (dùng uv)
 └── README.md                   # Tài liệu hướng dẫn hoàn chỉnh
 ```
 
@@ -167,21 +158,40 @@ mathapp/
 ### Bước 4: Cài đặt và chạy thử trên máy tính (Local)
 
 #### 4.1. Yêu cầu môi trường
-- **Python**: Phiên bản 3.9 trở lên ([Tải Python](https://www.python.org/downloads/))
+- **Python**: Phiên bản 3.10 trở lên ([Tải Python](https://www.python.org/downloads/))
+- **uv**: Trình quản lý môi trường Python hiện đại ([Tải uv](https://docs.astral.sh/uv/))
 - **Node.js**: Phiên bản 18 trở lên ([Tải Node.js](https://nodejs.org/))
 - **Git**: ([Tải Git](https://git-scm.com/))
 
-#### 4.2. Cách 1: Chạy nhanh bằng script (Khuyên dùng)
-- **Trên Windows**: Nhấp đúp chuột vào file `run_local.bat`.
-- Script sẽ tự động kiểm tra Python, Node.js, cài đặt dependencies và mở cả Backend (`:8000`) lẫn Frontend (`:5173`).
+#### 4.2. Cài đặt uv (lần đầu)
 
-#### 4.3. Cách 2: Khởi chạy thủ công từng phần
+**Trên Windows (PowerShell):**
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
 
-**Cửa sổ Terminal 1 — Backend (FastAPI):**
+**Trên macOS / Linux:**
 ```bash
-cd backend
-pip install -r requirements.txt
-python -m uvicorn backend.app.main:app --reload --port 8000
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Sau khi cài xong, khởi động lại terminal để `uv` được nhận diện trong PATH.
+
+#### 4.3. Cách 1: Chạy nhanh bằng script (Khuyên dùng — Windows)
+- Nhấp đúp chuột vào file **`run_local.bat`**.
+- Script sẽ tự động:
+  1. Kiểm tra và cài `uv` nếu chưa có.
+  2. Tạo virtual environment Python (`.venv`) và cài đặt tất cả dependencies backend qua `uv sync`.
+  3. Kiểm tra Node.js, cài npm packages cho frontend.
+  4. Mở cả Backend (`:8000`) lẫn Frontend (`:5173`) trong hai cửa sổ terminal riêng.
+
+#### 4.4. Cách 2: Khởi chạy thủ công từng phần
+
+**Cửa sổ Terminal 1 — Backend (FastAPI + uv):**
+```bash
+# Tại thư mục gốc dự án (mathapp/)
+uv sync                          # Tạo .venv và cài đặt gói Python từ uv.lock
+uv run uvicorn backend.app.main:app --reload --port 8000
 ```
 - API Backend hoạt động tại: `http://localhost:8000`
 - Tài liệu API tương tác Swagger UI: `http://localhost:8000/docs`
@@ -193,6 +203,8 @@ npm install
 npm run dev
 ```
 - Mở trình duyệt web truy cập: **`http://localhost:5173`**
+
+> **Lưu ý**: File cơ sở dữ liệu SQLite (`backend/data/database.sqlite`) sẽ được tự động tạo khi khởi động backend lần đầu — không cần cài thêm bất kỳ phần mềm cơ sở dữ liệu nào (SQLite đã tích hợp sẵn trong Python).
 
 ---
 
@@ -225,7 +237,7 @@ git push -u origin main
 ### Bước 6: Hướng dẫn Deploy miễn phí lên Render (onrender.com)
 
 1. Đăng nhập [render.com](https://render.com) bằng tài khoản GitHub.
-2. Nhấn nút **New +** -> Chọn **Web Service**.
+2. Nhấn nút **New +** → Chọn **Web Service**.
 3. Chọn repo `math-statistics-dashboard` vừa đẩy lên GitHub và nhấn **Connect**.
 4. Cấu hình các thông số:
    - **Name**: `math-statistics-dashboard` (hoặc tên tùy chọn)
@@ -233,18 +245,22 @@ git push -u origin main
    - **Branch**: `main`
    - **Runtime**: `Python 3`
    - **Build Command**:
-     ```bash
-     pip install -r requirements.txt && cd frontend && npm install && npm run build && cd ..
+     ```
+     ./build.sh
      ```
    - **Start Command**:
-     ```bash
+     ```
      uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
      ```
    - **Instance Type**: `Free` (Miễn phí)
 5. Cuộn xuống phần **Environment Variables** và thêm:
-   - `PYTHON_VERSION` = `3.10.12`
+   - `PYTHON_VERSION` = `3.13.0`
    - `NODE_VERSION` = `20.10.0`
-6. Nhấn **Create Web Service**. Sau khi quá trình build hoàn tất, ứng dụng sẽ có URL công khai (dạng `https://math-statistics-dashboard.onrender.com`) để bất kỳ ai cũng có thể truy cập từ điện thoại hoặc máy tính.
+6. Nhấn **Create Web Service**. Sau khi quá trình build hoàn tất (khoảng 3–5 phút), ứng dụng sẽ có URL công khai (dạng `https://math-statistics-dashboard.onrender.com`) để bất kỳ ai cũng có thể truy cập từ điện thoại hoặc máy tính.
+
+> **Lưu ý về Region "No existing services"**: Nếu chọn Region Singapore mà thấy thông báo *"No existing services"* — đây là bình thường, không phải lỗi. Render chỉ hiển thị vậy khi bạn chưa có service nào tại vùng đó; cứ tiếp tục tạo mới bình thường.
+
+> **Lưu ý về PYTHON_VERSION**: Bạn có thể điền phiên bản Python mà Render hỗ trợ (ví dụ `3.13.0`). Phiên bản Python trên máy cá nhân (ví dụ `3.14.x`) không cần phải trùng khớp — Render dùng phiên bản riêng của nó để build. Dự án này tương thích với Python 3.10 trở lên.
 
 ---
 
@@ -254,60 +270,76 @@ Trong quá trình thử nghiệm thực tế và phát triển dự án, nhiều
 
 ### Lỗi 1: Cú pháp f-string trong Python 3.14
 - **Hiện tượng**: Khi khởi động backend trên Python 3.14, file `backend/app/stats.py` báo lỗi `SyntaxError: f-string: expressions nested too deeply` hoặc lỗi dấu ngoặc nhọn `{,}` trong chuỗi định dạng KaTeX.
-- **Nguyên nhân**: Python 3.14 kiểm tra chặt chẽ cú pháp f-string, ký tự `{,}` dùng để viết dấu phẩy số học trong KaTeX bị hiểu lầm là biểu thức Python rỗng.
-- **Khắc phục**: Sửa ký tự `{,}` thành `{{,}}` (escape ngoặc nhọn trong f-string) tại dòng 232 của `stats.py`.
+- **Nguyên nhân**: Python 3.14 kiểm tra chặt chẽ cú pháp f-string; ký tự `{,}` dùng để viết dấu phẩy số học trong KaTeX bị hiểu lầm là biểu thức Python rỗng.
+- **Khắc phục**: Sửa ký tự `{,}` thành `{{,}}` (escape ngoặc nhọn trong f-string) tại file `stats.py`.
 
 ### Lỗi 2: Nhận diện Python trong script `run_local.bat`
 - **Hiện tượng**: Windows 11 thường có các file thực thi stub rỗng của Python tại `WindowsApps` dẫn đến việc lệnh `where python` tìm thấy nhưng khi chạy thì mở Microsoft Store hoặc báo lỗi code 1.
-- **Khắc phục**: 
-  - Bổ sung bước kiểm tra thực thi lệnh thực tế `%%C -c "import sys"` để xác thực file Python thật sự hoạt động được.
-  - Tự động bổ sung `%LOCALAPPDATA%\Python\bin` vào biến môi trường `PATH` trong file `.bat` để nhận diện các phiên bản `python3.14-64.exe` được cài đặt riêng.
+- **Khắc phục**:
+  - Bổ sung bước kiểm tra thực thi lệnh thực tế `%%C -c "import sys"` để xác thực file Python thật sự hoạt động.
+  - Tự động bổ sung `%LOCALAPPDATA%\Python\bin` vào biến môi trường `PATH` trong file `.bat`.
+  - **Nâng cấp sau**: Chuyển sang dùng `uv` để không cần lo tìm Python thủ công nữa — `uv` tự quản lý toàn bộ môi trường Python.
 
 ### Cải tiến 3: Bổ sung Homepage & Bỏ các mẫu số liệu có sẵn
-- **Yêu cầu**: Người dùng không muốn hệ thống nạp sẵn các mẫu số liệu ví dụ (chạy 100m, chiều cao bóng rổ, số con trong gia đình...), mà muốn giao diện mở đầu là một **Trang chủ (Homepage)** thông thường, có hình ảnh, tên web, mô tả tính năng ngắn gọn và nút **"NHẤN ĐỂ BẮT ĐẦU THỐNG KÊ"**.
+- **Yêu cầu**: Người dùng không muốn hệ thống nạp sẵn các mẫu số liệu ví dụ, mà muốn giao diện mở đầu là một **Trang chủ (Homepage)** thông thường có hình ảnh, tên web, mô tả tính năng ngắn gọn và nút **"NHẤN ĐỂ BẮT ĐẦU THỐNG KÊ"**.
 - **Thực hiện**:
   - Tạo mới component `Homepage.jsx` với giao diện chuyên nghiệp, banner đồ họa toán học `homepage-banner.svg`, lưới 6 tính năng nổi bật và nút bắt đầu to rõ.
-  - Xóa toàn bộ danh sách `DEMO_DATASETS` trong backend `storage.py`, làm sạch file `datasets.csv` về dạng chỉ có dòng tiêu đề.
+  - Xóa toàn bộ danh sách `DEMO_DATASETS` trong backend `storage.py`, đưa cơ sở dữ liệu về trạng thái trống ban đầu.
   - Xóa danh sách `DEMO_DATA_PRESETS` và modal chọn ví dụ SGK trong frontend.
 
-### Tính năng mới 4: Nhập dữ liệu tự động từ file Excel (`.xlsx` / `.xls`) đa định dạng (Cột dọc & Hàng ngang)
-- **Yêu cầu**: Học sinh và giáo viên thường lưu số liệu thống kê trong bảng tính Excel với nhiều cách bố trí khác nhau (xếp theo cột dọc hoặc kẻ bảng theo hàng ngang như trong SGK Toán 10). Hệ thống cần nhận diện và đọc thông minh cả hai định dạng này.
+### Tính năng mới 4: Nhập dữ liệu từ file Excel (`.xlsx` / `.xls`) đa định dạng (Cột dọc & Hàng ngang)
+- **Yêu cầu**: Học sinh và giáo viên thường lưu số liệu trong bảng tính Excel với nhiều cách bố trí khác nhau (xếp theo cột dọc hoặc kẻ bảng theo hàng ngang như trong SGK Toán 10). Hệ thống cần nhận diện thông minh cả hai định dạng.
 - **Thực hiện**:
   - Tích hợp thư viện `xlsx` (SheetJS) cho frontend.
   - Xây dựng thuật toán tự động nhận diện cấu trúc ma trận của sheet:
-    - *Chế độ Dãy số liệu*: Tự động đọc dữ liệu dù xếp theo 1 cột dọc (A), theo 1 hàng ngang, hoặc cả lưới ma trận nhiều hàng nhiều cột.
+    - *Chế độ Dãy số liệu*: Tự động đọc dù xếp theo 1 cột dọc, 1 hàng ngang, hoặc bảng lưới nhiều hàng nhiều cột.
     - *Chế độ Bảng tần số*: Tự động nhận diện cả dạng **Cột dọc** (Cột A: Giá trị $x_i$, Cột B: Tần số $n_i$) lẫn dạng **Hàng ngang** chuẩn SGK Toán 10 (Hàng trên: Giá trị $x_i$, Hàng dưới: Tần số $n_i$).
-  - Bổ sung panel bấm xem **"Yêu cầu định dạng file Excel"** kèm hình ảnh minh họa mẫu trực quan cho cả 2 kiểu xếp dữ liệu.
+  - Bổ sung panel bấm xem **"Yêu cầu định dạng file Excel"** kèm minh họa mẫu cho cả 2 kiểu xếp dữ liệu.
 
 ### Lỗi 5: Sửa lỗi đổi tên bài toán / mẫu số liệu
-- **Hiện tượng**: Người dùng nhập tên mới cho bài toán trong form nhưng sau khi lưu thì tên không được cập nhật lại hoặc bị ghi đè thành tên cũ.
-- **Nguyên nhân**: 
-  1. Trong `App.jsx`, hàm `handleSaveDataset` luôn gửi request `POST` (tạo mới) thay vì `PUT` (cập nhật) đối với các mẫu số liệu đã có trong cơ sở dữ liệu.
+- **Hiện tượng**: Người dùng nhập tên mới cho bài toán trong form nhưng sau khi lưu thì tên không được cập nhật hoặc bị ghi đè thành tên cũ.
+- **Nguyên nhân**:
+  1. Trong `App.jsx`, hàm `handleSaveDataset` luôn gửi request `POST` (tạo mới) thay vì `PUT` (cập nhật) đối với các mẫu đã có trong cơ sở dữ liệu.
   2. Trong `DataEntryForm.jsx`, `useEffect([currentDataset])` tự động reset form mỗi khi state cha cập nhật, ghi đè lên nội dung người dùng đang gõ.
 - **Khắc phục**:
   - Trong `App.jsx`: Kiểm tra nếu `activeDataset.id` đã tồn tại thì gọi API `PUT /api/datasets/{id}`, nếu chưa có thì gọi `POST /api/datasets`.
-  - Trong `DataEntryForm.jsx`: Sử dụng `prevDatasetIdRef = useRef(null)` để **chỉ sync form khi ID mẫu số liệu thực sự thay đổi** (khi người dùng chọn bài toán khác), không sync lại khi đang gõ tên.
+  - Trong `DataEntryForm.jsx`: Sử dụng `prevDatasetIdRef = useRef(null)` để **chỉ sync form khi ID mẫu số liệu thực sự thay đổi**, không sync lại khi đang gõ tên.
 
-### Lỗi 6: Sửa lỗi chỉ lưu được 1 mẫu số liệu vào file CSV
-- **Hiện tượng**: Sau khi người dùng lưu mẫu số liệu thứ nhất, nếu nhập tiếp mẫu số liệu thứ hai thì dữ liệu bị ghi đè lên mẫu thứ nhất, trong file CSV chỉ lưu được duy nhất 1 mẫu.
-- **Nguyên nhân**: Sau khi lưu mẫu 1 thành công, biến `activeDataset` mang `id` của mẫu 1. Nút "Làm mới form" trước đây chỉ xóa trắng các trường nhập trong form nhưng không xóa `id` trong state cha. Do đó khi bấm "Lưu", hàm tưởng rằng người dùng đang sửa mẫu 1 và thực hiện `PUT` ghi đè.
+### Lỗi 6: Sửa lỗi chỉ lưu được 1 mẫu số liệu
+- **Hiện tượng**: Sau khi lưu mẫu thứ nhất, nếu nhập tiếp mẫu thứ hai thì dữ liệu bị ghi đè lên mẫu thứ nhất; file chỉ lưu được duy nhất 1 mẫu.
+- **Nguyên nhân**: Sau khi lưu mẫu 1, biến `activeDataset` mang `id` của mẫu 1. Nút "Làm mới form" trước đây chỉ xóa trắng các trường nhập nhưng không xóa `id` trong state cha. Do đó khi bấm "Lưu", hàm tưởng người dùng đang sửa mẫu 1 và thực hiện `PUT` ghi đè.
 - **Khắc phục**:
-  - Nâng cấp nút "Làm mới form" thành nút **"Thêm mẫu số liệu mới"** (màu xanh lá) và bổ sung nút **"Nhập mẫu tiếp theo"** hiển thị ngay sau khi lưu.
+  - Nâng cấp nút "Làm mới form" thành nút **"Thêm mẫu số liệu mới"** và bổ sung nút **"Nhập mẫu tiếp theo"** hiển thị ngay sau khi lưu.
   - Khi nhấn, hệ thống gọi `onNewDataset()` để reset `activeDataset` về trạng thái mới hoàn toàn (không mang ID cũ).
-  - Nút lưu tự động đổi nhãn: hiển thị **"Lưu vào CSV"** (khi tạo mẫu mới) và **"Cập nhật CSV"** (khi đang chỉnh sửa mẫu cũ).
 
 ### Cải tiến 7: Tái cấu trúc chuẩn giao diện 3 phân vùng (Tổng quan, Nhập liệu, Báo cáo & Thống kê)
 - **Yêu cầu của người dùng**:
-  - *Phần tổng quan*: Chỉ hiện mỗi nội dung cơ bản của mẫu số liệu.
-  - *Phần nhập liệu*: Chỉ hiện mỗi phần nhập mẫu số liệu và lưu file CSV, không hiện gì khác.
-  - *Phần báo cáo và thống kê*: Chỉ đưa những báo cáo được và mẫu số liệu sau khi được nhập.
+  - *Phần tổng quan*: Chỉ hiện nội dung cơ bản của mẫu số liệu.
+  - *Phần nhập liệu*: Chỉ hiện form nhập mẫu số liệu và nút lưu, không hiện gì khác.
+  - *Phần báo cáo và thống kê*: Chỉ đưa những báo cáo được và mẫu số liệu sau khi nhập.
 - **Thực hiện**:
-  1. **Tab Tổng quan (`dashboard`)**: Loại bỏ hoàn toàn form nhập liệu và các phần công thức giải chi tiết. Chỉ giữ lại Header tóm tắt, 4 thẻ KPI cơ bản, khối hiển thị dãy số liệu tăng dần (Min, Max, R) và Bảng danh sách dữ liệu CSV để quản lý.
-  2. **Tab Nhập liệu (`entry`)**: Dọn dẹp sạch sẽ toàn bộ các khối KPI, biểu đồ, bảng dữ liệu xung quanh. Trang chỉ hiển thị duy nhất `DataEntryForm` phục vụ nhập liệu và lưu CSV.
-  3. **Tab Báo cáo & Thống kê (`reports`)**: Tập trung hiển thị:
-     - Khối *Mẫu số liệu sau khi được nhập* (Dãy số gốc, Dãy số sắp xếp không giảm đánh dấu ngoại lệ, Bảng phân bố tần số & tần suất, 5 số tóm tắt).
-     - Khối *Những báo cáo được* (4 thẻ KPI, Thống kê chi tiết & Lời giải KaTeX từng bước, Biểu đồ hộp Box Plot, Biểu đồ cột tần số).
-     - Bổ sung bộ chọn nhanh chuyển đổi giữa các mẫu số liệu trực tiếp trong trang báo cáo.
+  1. **Tab Tổng quan (`dashboard`)**: Chỉ giữ lại Header tóm tắt, 4 thẻ KPI cơ bản, khối hiển thị dãy số liệu và Bảng danh sách dữ liệu để quản lý.
+  2. **Tab Nhập liệu (`entry`)**: Chỉ hiển thị duy nhất `DataEntryForm`.
+  3. **Tab Báo cáo & Thống kê (`reports`)**: Hiển thị đầy đủ Mẫu số liệu sau nhập, 4 thẻ KPI, Thống kê chi tiết & Lời giải KaTeX, Biểu đồ hộp Box Plot, Biểu đồ cột tần số. Bổ sung bộ chọn nhanh chuyển đổi giữa các mẫu số liệu trực tiếp trong trang.
+
+### Cải tiến 8: Chuyển lưu trữ từ CSV sang SQLite & Đổi tên nút lưu
+- **Yêu cầu**: Thay thế file CSV bằng cơ sở dữ liệu SQLite để đảm bảo tính toàn vẹn dữ liệu (không bị lỗi khi ghi đồng thời, dễ truy vấn hơn). Đổi tên nút "Lưu vào CSV" thành "Lưu mẫu số liệu" cho phù hợp hơn.
+- **Thực hiện**:
+  - Viết lại hoàn toàn `backend/app/storage.py`: thay tất cả thao tác đọc/ghi CSV bằng các câu lệnh SQL chuẩn (`CREATE TABLE`, `INSERT`, `SELECT`, `UPDATE`, `DELETE`) qua module `sqlite3` tích hợp sẵn trong Python — không cần cài thêm bất kỳ gói nào.
+  - Tự động migrate dữ liệu từ file `datasets.csv` cũ sang SQLite khi khởi động lần đầu.
+  - Cập nhật `backend/app/config.py`: thêm `DB_FILE_PATH = DATA_DIR / "database.sqlite"`.
+  - Xóa endpoint `/api/export/csv` không còn dùng và dọn sạch import thừa trong `main.py`.
+  - Frontend: Đổi nhãn nút **"Lưu vào CSV"** → **"Lưu mẫu số liệu"**, **"Cập nhật CSV"** → **"Cập nhật"**, thông báo **"Đã lưu vào CSV!"** → **"Đã lưu thành công!"**.
+  - Dọn sạch tất cả text "CSV" còn sót trong `DataTable.jsx`, `Sidebar.jsx`, `SettingsModal.jsx`.
+
+### Cải tiến 9: Chuyển sang dùng `uv` để quản lý Python
+- **Yêu cầu**: Dùng `uv` — trình quản lý môi trường Python thế hệ mới (nhanh hơn pip ~10–100 lần, tự động quản lý phiên bản Python, lock file chính xác) thay cho pip/venv thủ công.
+- **Thực hiện**:
+  - Tạo file `pyproject.toml` chuẩn PEP 517 khai báo dependencies dự án.
+  - Tạo `uv.lock` — lock file ghi chính xác phiên bản từng gói (đảm bảo tái lập được môi trường 100%).
+  - Cập nhật `run_local.bat`: tự động cài uv nếu chưa có, dùng `uv sync` tạo `.venv` và `uv run uvicorn ...` để chạy backend.
+  - Cập nhật `build.sh` cho Render: cài uv trên server build rồi dùng `uv pip install --system -r requirements.txt`.
+  - Nâng `PYTHON_VERSION` trong `render.yaml` lên `3.13.0`.
 
 ---
 
@@ -324,25 +356,25 @@ Trong quá trình thử nghiệm thực tế và phát triển dự án, nhiều
 2. Nhập **Tên bài toán / Tên mẫu số liệu** (Ví dụ: *Điểm kiểm tra giữa kì môn Toán 10*).
 3. Chọn chế độ **"Dãy số liệu"**.
 4. Nhập các số vào ô nội dung, có thể dùng dấu phẩy `,`, dấu chấm phẩy `;` hoặc khoảng trắng:
-   ```text
+   ```
    7.5; 8.0; 6.5; 9.0; 8.5; 7.0; 8.0; 9.5; 4.0; 8.5; 1.5; 10.0
    ```
 5. Hệ thống sẽ tự động cập nhật cỡ mẫu $n$ và sắp xếp dãy số tăng dần ngay bên dưới.
-6. Nhấn **"Lưu dữ liệu vào CSV"**.
+6. Nhấn **"Lưu mẫu số liệu"**.
 
 ---
 
 ### 4.3. Nhập bảng phân bố tần số
 1. Tại form nhập liệu, chọn chế độ **"Có tần số"**.
 2. Nhập mỗi dòng là một cặp `Giá trị : Tần số`:
-   ```text
+   ```
    0: 4
    1: 12
    2: 18
    3: 5
    4: 1
    ```
-3. Hệ thống sẽ tự động tính toán tổng số phần tử $n = 4 + 12 + 18 + 5 + 1 = 40$ và giải phóng các giá trị tương ứng.
+3. Hệ thống tự động tính tổng số phần tử $n = 4 + 12 + 18 + 5 + 1 = 40$ và giải phóng các giá trị tương ứng.
 
 ---
 
@@ -360,22 +392,24 @@ Trong quá trình thử nghiệm thực tế và phát triển dự án, nhiều
 ---
 
 ### 4.5. Lưu trữ và quản lý nhiều mẫu số liệu
-- Sau khi nhấn lưu thành công, bạn sẽ thấy thông báo kèm nút **"Nhập mẫu tiếp theo"**.
+- Sau khi nhấn **"Lưu mẫu số liệu"** thành công, bạn sẽ thấy thông báo **"Đã lưu thành công!"** kèm nút **"Nhập mẫu tiếp theo"**.
 - Nhấn **"Nhập mẫu tiếp theo"** (hoặc nút **"Thêm mẫu số liệu mới"** ở góc trên form) để làm mới form và nhập bài toán tiếp theo.
-- Toàn bộ các bài toán đã lưu sẽ hiển thị trong bảng dữ liệu tại tab **Tổng quan**. Bạn có thể:
+- Toàn bộ các bài toán đã lưu hiển thị trong bảng tại tab **Tổng quan**. Bạn có thể:
   - Nhấp vào một dòng để chọn xem mẫu số liệu đó.
   - Nhấn nút **Sửa** (icon cây bút) để chỉnh sửa lại số liệu.
-  - Nhấn nút **Xóa** (icon thùng rác) để xóa mẫu số liệu khỏi cơ sở dữ liệu CSV.
+  - Nhấn nút **Xóa** (icon thùng rác) để xóa mẫu số liệu khỏi cơ sở dữ liệu SQLite.
+- Để xóa toàn bộ dữ liệu: Vào **Cài đặt** (icon bánh răng trên Sidebar) → **"Làm sạch cơ sở dữ liệu"**.
 
 ---
 
 ### 4.6. Xem báo cáo thống kê & Lời giải công thức KaTeX
-1. Nhấp vào mục **"Báo cáo & Thống kê"** trên Sidebar (hoặc nút *"Xem báo cáo chi tiết"*).
+1. Nhấp vào mục **"Báo cáo & Thống kê"** trên Sidebar (hoặc nút *"Xem báo cáo →"* sau khi lưu).
 2. Tại đây bạn sẽ thấy:
    - **Mẫu số liệu sau khi được nhập**: Dãy số gốc, Dãy số sắp xếp không giảm, Bảng tần số và 5 số tóm tắt ($Min, Q_1, Q_2, Q_3, Max$).
    - **4 Thẻ KPI**: Cỡ mẫu $n$, Trung bình $\bar{x}$, Trung vị $M_e$, Khoảng tứ phân vị $\Delta_Q$.
    - **Cảnh báo giá trị ngoại lệ**: Tự động thông báo có hoặc không có điểm dị biệt.
-   - **Bảng công thức KaTeX chi tiết**: Trình bày rõ ràng công thức tổng quát và phép thế số thực tế theo đúng chương trình Toán 10. Bạn có thể nhấn icon copy để sao chép mã KaTeX vào bài tập, giáo án.
+   - **Bảng công thức KaTeX chi tiết**: Trình bày rõ công thức tổng quát và phép thế số thực tế theo đúng chương trình Toán 10.
+3. Dùng **bộ chọn mẫu số liệu** ở đầu trang để chuyển đổi nhanh giữa các bài toán đã lưu.
 
 ---
 
@@ -383,7 +417,7 @@ Trong quá trình thử nghiệm thực tế và phát triển dự án, nhiều
 - **Thân hộp (Box)**: Kéo dài từ $Q_1$ đến $Q_3$, chứa 50% số lượng dữ liệu ở trung tâm.
 - **Vạch kẻ giữa hộp**: Thể hiện giá trị Trung vị $M_e = Q_2$.
 - **Hai râu (Whiskers)**: Nối từ thân hộp tới giá trị nhỏ nhất và lớn nhất trong ngưỡng an toàn.
-- **Điểm tròn màu đỏ**: Là các **giá trị ngoại lệ** bất thường thỏa mãn $x < Q_1 - 1{,}5\Delta_Q$ hoặc $x > Q_3 + 1{,}5\Delta_Q$. Rê chuột vào điểm để xem giá trị chính xác.
+- **Điểm tròn màu đỏ**: Là các **giá trị ngoại lệ** thỏa mãn $x < Q_1 - 1{,}5\Delta_Q$ hoặc $x > Q_3 + 1{,}5\Delta_Q$. Rê chuột vào điểm để xem giá trị chính xác.
 
 ---
 
@@ -403,12 +437,12 @@ $$x_1 \le x_2 \le \dots \le x_n$$
 
 - **Trung vị ($M_e$)**:
   - Khi $n$ lẻ ($n = 2k + 1$): $M_e = x_{k+1}$ (phần tử chính giữa).
-  - Khi $n$ chẵn ($n = 2k$): $M_e = \frac{x_k + x_{k+1}}{2}$ (trung bình 2 phần tử chính giữa).
+  - Khi $n$ chẵn ($n = 2k$): $M_e = \dfrac{x_k + x_{k+1}}{2}$ (trung bình 2 phần tử chính giữa).
 
 - **Tứ phân vị ($Q_1, Q_2, Q_3$)**:
   - $Q_2 = M_e$ (trung vị của toàn bộ mẫu số liệu).
-  - *Khi $n$ lẻ*: Dãy chia làm 2 nửa: nửa dưới từ $x_1$ đến $x_{\frac{n-1}{2}}$ (không gồm $Q_2$), nửa trên từ $x_{\frac{n+3}{2}}$ đến $x_n$ (không gồm $Q_2$). $Q_1$ là trung vị nửa dưới; $Q_3$ là trung vị nửa trên.
-  - *Khi $n$ chẵn*: Dãy chia làm 2 nửa bằng nhau: nửa dưới từ $x_1$ đến $x_{n/2}$, nửa trên từ $x_{n/2 + 1}$ đến $x_n$. $Q_1$ là trung vị nửa dưới; $Q_3$ là trung vị nửa trên.
+  - *Khi $n$ lẻ*: Nửa dưới từ $x_1$ đến $x_{\frac{n-1}{2}}$ (không gồm $Q_2$); $Q_1$ là trung vị nửa dưới. Nửa trên từ $x_{\frac{n+3}{2}}$ đến $x_n$ (không gồm $Q_2$); $Q_3$ là trung vị nửa trên.
+  - *Khi $n$ chẵn*: Nửa dưới từ $x_1$ đến $x_{n/2}$; nửa trên từ $x_{n/2 + 1}$ đến $x_n$. $Q_1$ là trung vị nửa dưới; $Q_3$ là trung vị nửa trên.
 
 - **Mốt ($M_o$)**: Là giá trị có tần số xuất hiện lớn nhất trong mẫu số liệu.
 
@@ -423,7 +457,7 @@ $$x_1 \le x_2 \le \dots \le x_n$$
   $$s = \sqrt{s^2}$$
 
 ### 5.4. Quy tắc xác định giá trị ngoại lệ (Outliers)
-Một giá trị $x$ trong mẫu số liệu được gọi là **giá trị ngoại lệ** nếu nó thỏa mãn một trong hai điều kiện:
+Một giá trị $x$ trong mẫu số liệu được gọi là **giá trị ngoại lệ** nếu thỏa mãn một trong hai điều kiện:
 $$x < Q_1 - 1{,}5\Delta_Q \quad \text{hoặc} \quad x > Q_3 + 1{,}5\Delta_Q$$
 
 ---
